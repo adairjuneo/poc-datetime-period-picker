@@ -231,7 +231,7 @@ Days outside the current month are visible but visually muted. The grid always h
 ### Month/year navigation
 
 - `<` / `>` arrows in header -> `navigateMonth(-1 | 1)`
-- Click on "Março 2026" label -> toggles to month/year selection mode (grid of 12 months or numeric year input)
+- *(Optional/stretch)* Click on "Março 2026" label -> toggles to month/year selection mode (grid of 12 months or numeric year input). Not a core requirement from TASK.md; implement only if time permits.
 - Keyboard: holding arrow while header is focused navigates quickly
 
 ### Day visual states
@@ -350,6 +350,13 @@ Only renders when `variant="datetime"`. Appears below the calendar inside the dr
 - When `props.value` changes externally (e.g. async data arrived), input formats `Date -> pt-BR string` and displays
 - When input is focused and user is typing, local input value prevails (does not overwrite what user is typing)
 
+**Editing time portion of existing value (datetime variant):**
+- The input displays the full string `DD/MM/AAAA HH:mm` as a single masked field
+- The user can click or use arrow keys to position the cursor anywhere in the string
+- Editing works character-by-character: if the user positions the cursor on the hours portion and types new digits, the mask preserves the rest of the string
+- Selecting all text and retyping applies the mask from scratch
+- This means hours/minutes can be edited independently of the date portion without clearing the entire field
+
 ### Dropdown -- Responsive Positioning
 
 **Default position:**
@@ -439,7 +446,7 @@ Tests with **Vitest** + **React Testing Library**.
 
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
-| Date library | date-fns | Tree-shakeable, immutable, pure functions. Replaces deprecated moment.js |
+| Date library | date-fns | TASK.md specified moment.js, but moment.js is deprecated since 2020 (maintenance-only). This deviation was discussed and **approved by the stakeholder** during brainstorming. date-fns was chosen for being tree-shakeable, immutable, and using pure functions. |
 | Async data | Async initial value | Component handles loading state with empty strings |
 | Selection flow | Sequential | Start -> auto-focus end -> close. Clear and predictable |
 | Time selection | Scrollable columns | Visual, intuitive, Material UI-like UX |
