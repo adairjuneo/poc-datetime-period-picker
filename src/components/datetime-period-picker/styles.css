@@ -1,0 +1,260 @@
+/* --- Wrapper --- */
+.dtp-wrapper {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  font-family: var(--sans);
+}
+
+/* --- Inputs row --- */
+.dtp-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dtp-inputs-separator {
+  color: var(--text);
+  font-size: 14px;
+  user-select: none;
+}
+
+.dtp-input {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text-h);
+  font-family: var(--mono);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 140px;
+}
+
+.dtp-input:focus,
+.dtp-input--active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-bg);
+}
+
+.dtp-input--error {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+}
+
+.dtp-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --- Dropdown --- */
+.dtp-dropdown {
+  position: absolute;
+  z-index: 1000;
+  margin-top: 4px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  padding: 12px;
+  width: 300px;
+}
+
+.dtp-dropdown--above {
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: 4px;
+}
+
+.dtp-dropdown--align-right {
+  right: 0;
+}
+
+/* --- Calendar --- */
+.dtp-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.dtp-calendar-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 16px;
+}
+
+.dtp-calendar-nav:hover {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.dtp-calendar-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-h);
+  cursor: default;
+}
+
+.dtp-calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 4px;
+}
+
+.dtp-calendar-weekday {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  padding: 4px 0;
+  user-select: none;
+}
+
+.dtp-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+}
+
+/* --- Day cells --- */
+.dtp-day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-h);
+  padding: 0;
+  transition: background 0.1s, color 0.1s;
+}
+
+.dtp-day:hover:not(.dtp-day--disabled):not(.dtp-day--selected-start):not(.dtp-day--selected-end) {
+  background: var(--accent-bg);
+}
+
+.dtp-day--outside {
+  color: var(--text);
+  opacity: 0.4;
+}
+
+.dtp-day--disabled {
+  color: var(--text);
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.dtp-day--today {
+  border: 1px solid var(--accent-border);
+}
+
+.dtp-day--selected-start,
+.dtp-day--selected-end {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.dtp-day--in-range {
+  background: var(--accent-bg);
+  border-radius: 0;
+}
+
+.dtp-day--range-start {
+  border-radius: 6px 0 0 6px;
+}
+
+.dtp-day--range-end {
+  border-radius: 0 6px 6px 0;
+}
+
+.dtp-day--hover-preview {
+  background: var(--accent-bg);
+  opacity: 0.6;
+}
+
+.dtp-day:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* --- Time Selector --- */
+.dtp-time-selector {
+  display: flex;
+  gap: 12px;
+  padding-top: 12px;
+  margin-top: 12px;
+  border-top: 1px solid var(--border);
+  justify-content: center;
+}
+
+.dtp-time-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.dtp-time-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  text-transform: uppercase;
+}
+
+.dtp-time-column {
+  height: 160px;
+  width: 48px;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  scrollbar-width: none;
+}
+
+.dtp-time-column::-webkit-scrollbar {
+  display: none;
+}
+
+.dtp-time-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  font-size: 13px;
+  font-family: var(--mono);
+  color: var(--text);
+  cursor: pointer;
+  scroll-snap-align: center;
+  transition: background 0.1s, color 0.1s;
+  user-select: none;
+}
+
+.dtp-time-item:hover {
+  background: var(--accent-bg);
+}
+
+.dtp-time-item--active {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.dtp-time-selector--disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
