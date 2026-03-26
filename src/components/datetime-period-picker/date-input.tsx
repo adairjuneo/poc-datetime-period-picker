@@ -85,19 +85,13 @@ export function DateInput({ field, placeholder }: DateInputProps) {
   const defaultPlaceholder = picker.variant === 'datetime' ? 'DD/MM/AAAA HH:mm' : 'DD/MM/AAAA';
   const maxLength = picker.variant === 'datetime' ? 16 : 10;
 
-  const className = [
-    'dtp-input',
-    isActive ? 'dtp-input--active' : '',
-    hasError ? 'dtp-input--error' : '',
-  ]
-    .filter(Boolean)
-    .join(' ');
-
   return (
     <input
       ref={inputRef}
       type="text"
-      className={className}
+      className="input"
+      data-state-active={isActive || undefined}
+      data-state-error={hasError || undefined}
       value={displayValue}
       placeholder={placeholder ?? defaultPlaceholder}
       maxLength={maxLength}
