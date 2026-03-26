@@ -58,26 +58,22 @@ export function TimeSelector() {
     // Intentionally empty — these items never receive keyboard focus.
   }, []);
 
-  const selectorClass = [
-    'dtp-time-selector',
-    isDisabled && 'dtp-time-selector--disabled',
-  ].filter(Boolean).join(' ');
-
   return (
-    <div className={selectorClass}>
-      <div className="dtp-time-group">
-        <span className="dtp-time-label">Hora</span>
+    <div className="time-selector" data-state-disabled={isDisabled || undefined}>
+      <div className="time-group">
+        <span className="time-label">Hora</span>
         <div
           ref={hoursRef}
           tabIndex={-1}
-          className="dtp-time-column"
+          className="time-column"
           role="listbox"
           aria-label="Selecionar hora"
         >
           {HOURS.map((h) => (
             <div
               key={h}
-              className={`dtp-time-item ${h === currentHours ? 'dtp-time-item--active' : ''}`}
+              className="time-item"
+              data-state-active={h === currentHours || undefined}
               role="option"
               aria-selected={h === currentHours}
               tabIndex={-1}
@@ -91,19 +87,20 @@ export function TimeSelector() {
         </div>
       </div>
 
-      <div className="dtp-time-group">
-        <span className="dtp-time-label">Minuto</span>
+      <div className="time-group">
+        <span className="time-label">Minuto</span>
         <div
           ref={minutesRef}
           tabIndex={-1}
-          className="dtp-time-column"
+          className="time-column"
           role="listbox"
           aria-label="Selecionar minuto"
         >
           {MINUTES.map((m) => (
             <div
               key={m}
-              className={`dtp-time-item ${m === currentMinutes ? 'dtp-time-item--active' : ''}`}
+              className="time-item"
+              data-state-active={m === currentMinutes || undefined}
               role="option"
               aria-selected={m === currentMinutes}
               tabIndex={-1}
