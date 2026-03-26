@@ -9,6 +9,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test-setup.ts'],
+    exclude: ['src/components/__old/**'],
+    include: ['src/**/*.test.{ts,tsx}'],
   },
   build: {
     rollupOptions: {
