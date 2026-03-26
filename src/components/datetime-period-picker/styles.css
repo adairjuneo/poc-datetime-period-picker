@@ -190,9 +190,12 @@
   opacity: 0.6;
 }
 
-.dtp-day:focus-visible {
+/* focus-visible is not used — buttons don't receive real focus in dual-focus mode */
+
+.dtp-day--focused {
   outline: 2px solid var(--accent);
   outline-offset: -2px;
+  background-color: color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
 /* --- Time Selector --- */
