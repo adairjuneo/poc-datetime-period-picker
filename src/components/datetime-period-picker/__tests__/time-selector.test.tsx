@@ -184,23 +184,6 @@ describe('TimeSelector', () => {
     expect(mock.setTime).not.toHaveBeenCalled();
   });
 
-  it('handles Enter key to select hour', async () => {
-    const user = userEvent.setup();
-    const mock = createMockPicker({
-      activeField: 'initial',
-      initial: new Date(2026, 2, 25, 14, 30),
-    });
-    mockedUsePicker.mockReturnValue(mock);
-    render(<TimeSelector />);
-
-    const hourColumn = screen.getByRole('listbox', { name: 'Selecionar hora' });
-    const activeHour = hourColumn.querySelectorAll('[role="option"]')[14];
-
-    (activeHour as HTMLElement).focus();
-    await user.keyboard('{Enter}');
-    expect(mock.setTime).toHaveBeenCalledWith('initial', 14, 30);
-  });
-
   it('pads single-digit values with leading zero', () => {
     mockedUsePicker.mockReturnValue(createMockPicker({
       activeField: 'initial',
@@ -219,7 +202,7 @@ describe('TimeSelector', () => {
     expect(minuteOptions[5]).toHaveClass('dtp-time-item--active');
   });
 
-  it('sets tabIndex 0 only on active items, -1 on others', () => {
+  it('sets tabIndex -1 on all items (focus stays on inputs)', () => {
     mockedUsePicker.mockReturnValue(createMockPicker({
       activeField: 'initial',
       initial: new Date(2026, 2, 25, 14, 30),
@@ -229,8 +212,15 @@ describe('TimeSelector', () => {
     const hourColumn = screen.getByRole('listbox', { name: 'Selecionar hora' });
     const hourOptions = hourColumn.querySelectorAll('[role="option"]');
 
-    expect(hourOptions[14]).toHaveAttribute('tabindex', '0');
+    // All items should have tabIndex -1 — no roving tabindex
+    expect(hourOptions[14]).toHaveAttribute('tabindex', '-1');
     expect(hourOptions[0]).toHaveAttribute('tabindex', '-1');
     expect(hourOptions[23]).toHaveAttribute('tabindex', '-1');
+
+    const minuteColumn = screen.getByRole('listbox', { name: 'Selecionar minuto' });
+    const minuteOptions = minuteColumn.querySelectorAll('[role="option"]');
+
+    expect(minuteOptions[30]).toHaveAttribute('tabindex', '-1');
+    expect(minuteOptions[0]).toHaveAttribute('tabindex', '-1');
   });
 });

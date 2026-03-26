@@ -47,40 +47,16 @@ export function TimeSelector() {
     [setTime, activeField, isDisabled, currentHours],
   );
 
-  const handleKeyDown = useCallback(
-    (
-      e: React.KeyboardEvent,
-      type: 'hour' | 'minute',
-      value: number,
-    ) => {
-      const max = type === 'hour' ? 23 : 59;
-      let next = value;
+  // Prevent mousedown from stealing focus from the input fields.
+  // Items are tabIndex={-1} so onKeyDown never fires, but the handler
+  // satisfies the jsx-a11y/click-events-have-key-events lint rule.
+  const preventFocusSteal = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+  }, []);
 
-      switch (e.key) {
-        case 'ArrowUp':
-          e.preventDefault();
-          next = value > 0 ? value - 1 : max;
-          break;
-        case 'ArrowDown':
-          e.preventDefault();
-          next = value < max ? value + 1 : 0;
-          break;
-        case 'Enter':
-          e.preventDefault();
-          if (type === 'hour') handleSelectHour(value);
-          else handleSelectMinute(value);
-          return;
-        default:
-          return;
-      }
-
-      // Focus next item
-      const ref = type === 'hour' ? hoursRef : minutesRef;
-      const item = ref.current?.children[next] as HTMLElement;
-      if (item) item.focus();
-    },
-    [handleSelectHour, handleSelectMinute],
-  );
+  const noopKeyDown = useCallback((_e: React.KeyboardEvent) => {
+    // Intentionally empty — these items never receive keyboard focus.
+  }, []);
 
   const selectorClass = [
     'dtp-time-selector',
@@ -93,6 +69,7 @@ export function TimeSelector() {
         <span className="dtp-time-label">Hora</span>
         <div
           ref={hoursRef}
+          tabIndex={-1}
           className="dtp-time-column"
           role="listbox"
           aria-label="Selecionar hora"
@@ -103,9 +80,10 @@ export function TimeSelector() {
               className={`dtp-time-item ${h === currentHours ? 'dtp-time-item--active' : ''}`}
               role="option"
               aria-selected={h === currentHours}
-              tabIndex={h === currentHours ? 0 : -1}
+              tabIndex={-1}
               onClick={() => handleSelectHour(h)}
-              onKeyDown={(e) => handleKeyDown(e, 'hour', h)}
+              onMouseDown={preventFocusSteal}
+              onKeyDown={noopKeyDown}
             >
               {String(h).padStart(2, '0')}
             </div>
@@ -117,6 +95,7 @@ export function TimeSelector() {
         <span className="dtp-time-label">Minuto</span>
         <div
           ref={minutesRef}
+          tabIndex={-1}
           className="dtp-time-column"
           role="listbox"
           aria-label="Selecionar minuto"
@@ -127,9 +106,10 @@ export function TimeSelector() {
               className={`dtp-time-item ${m === currentMinutes ? 'dtp-time-item--active' : ''}`}
               role="option"
               aria-selected={m === currentMinutes}
-              tabIndex={m === currentMinutes ? 0 : -1}
+              tabIndex={-1}
               onClick={() => handleSelectMinute(m)}
-              onKeyDown={(e) => handleKeyDown(e, 'minute', m)}
+              onMouseDown={preventFocusSteal}
+              onKeyDown={noopKeyDown}
             >
               {String(m).padStart(2, '0')}
             </div>

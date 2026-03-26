@@ -23,13 +23,13 @@ export function DateInput({ field, placeholder }: DateInputProps) {
       ? `dtp-day-${picker.focusedDate.toISOString()}`
       : undefined;
 
-  // Sync external controlled value when not focused
+  // Sync localValue whenever the controlled date value changes (e.g. calendar selection).
+  // This runs even while focused — calendar clicks update dateValue externally and the
+  // input must reflect it immediately, not wait for blur.
   useEffect(() => {
-    if (!isFocused) {
-      setLocalValue(formatDatePtBr(dateValue, picker.variant));
-      setHasError(false);
-    }
-  }, [dateValue, picker.variant, isFocused]);
+    setLocalValue(formatDatePtBr(dateValue, picker.variant));
+    setHasError(false);
+  }, [dateValue, picker.variant]);
 
   // Auto-focus when activeField changes to this field
   useEffect(() => {
