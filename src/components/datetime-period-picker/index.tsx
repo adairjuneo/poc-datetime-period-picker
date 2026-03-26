@@ -44,10 +44,10 @@ function PickerShell({ variant, placeholder }: { variant: 'date' | 'datetime'; p
   );
 
   return (
-    <div ref={wrapperRef} className="dtp-wrapper" onBlur={handleBlur} onKeyDown={handleKeyDown}>
-      <div ref={anchorRef} className="dtp-inputs">
+    <div ref={wrapperRef} className="datetime-period-picker" onBlur={handleBlur} onKeyDown={handleKeyDown}>
+      <div ref={anchorRef} className="input-group">
         <DateInput field="initial" placeholder={placeholder} />
-        <span className="dtp-inputs-separator">—</span>
+        <span className="separator">—</span>
         <DateInput field="final" placeholder={placeholder} />
       </div>
 
