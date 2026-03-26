@@ -70,20 +70,6 @@ export function Dropdown({ anchorRef, children }: DropdownProps) {
     return () => document.removeEventListener('mousedown', handleMouseDown);
   }, [picker.isOpen, picker, anchorRef]);
 
-  // Close on Escape
-  useEffect(() => {
-    if (!picker.isOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        picker.close();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [picker.isOpen, picker]);
-
   if (!picker.isOpen) return null;
 
   const className = [

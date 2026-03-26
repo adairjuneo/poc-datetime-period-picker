@@ -93,10 +93,11 @@ describe('DateTimePeriodPicker', () => {
 
     it('closes dropdown on Escape', async () => {
       renderPicker();
-      await userEvent.click(screen.getByLabelText('Data inicial'));
+      const input = screen.getByLabelText('Data inicial');
+      await userEvent.click(input);
       expect(screen.getByRole('dialog')).toBeInTheDocument();
 
-      fireEvent.keyDown(document, { key: 'Escape' });
+      fireEvent.keyDown(input, { key: 'Escape' });
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 

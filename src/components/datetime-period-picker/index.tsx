@@ -1,5 +1,5 @@
-import { useRef } from 'react';
-import { PickerProvider } from './context';
+import { useRef, useCallback } from 'react';
+import { PickerProvider, usePicker } from './context';
 import { DateInput } from './date-input';
 import { Dropdown } from './dropdown';
 import { Calendar } from './calendar';
@@ -9,24 +9,54 @@ import './styles.css';
 
 export type { DatePeriod, DatePeriodChangeEvent, DateTimePeriodPickerProps } from './types';
 
-export function DateTimePeriodPicker(props: DateTimePeriodPickerProps) {
+function PickerShell({ variant, placeholder }: { variant: 'date' | 'datetime'; placeholder?: string }) {
+  const picker = usePicker();
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const anchorRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when focus leaves the entire component
+  const handleBlur = useCallback(
+    (e: React.FocusEvent) => {
+      const relatedTarget = e.relatedTarget as Node | null;
+      if (relatedTarget && wrapperRef.current?.contains(relatedTarget)) return;
+      picker.close();
+    },
+    [picker],
+  );
+
+  // Handle Escape scoped to this component only
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Escape' && picker.isOpen) {
+        e.stopPropagation();
+        picker.close();
+      }
+    },
+    [picker],
+  );
+
+  return (
+    <div ref={wrapperRef} className="dtp-wrapper" onBlur={handleBlur} onKeyDown={handleKeyDown}>
+      <div ref={anchorRef} className="dtp-inputs">
+        <DateInput field="initial" placeholder={placeholder} />
+        <span className="dtp-inputs-separator">—</span>
+        <DateInput field="final" placeholder={placeholder} />
+      </div>
+
+      <Dropdown anchorRef={anchorRef}>
+        <Calendar />
+        {variant === 'datetime' && <TimeSelector />}
+      </Dropdown>
+    </div>
+  );
+}
+
+export function DateTimePeriodPicker(props: DateTimePeriodPickerProps) {
   const variant = props.variant ?? 'date';
 
   return (
     <PickerProvider {...props}>
-      <div className="dtp-wrapper">
-        <div ref={anchorRef} className="dtp-inputs">
-          <DateInput field="initial" placeholder={props.placeholder} />
-          <span className="dtp-inputs-separator">—</span>
-          <DateInput field="final" placeholder={props.placeholder} />
-        </div>
-
-        <Dropdown anchorRef={anchorRef}>
-          <Calendar />
-          {variant === 'datetime' && <TimeSelector />}
-        </Dropdown>
-      </div>
+      <PickerShell variant={variant} placeholder={props.placeholder} />
     </PickerProvider>
   );
 }
