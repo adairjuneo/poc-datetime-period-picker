@@ -10,4 +10,9 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./src/test-setup.ts'],
   },
+  build: {
+    rollupOptions: {
+      external: ['src/components/__old/**'],
+    }
+  }
 })
