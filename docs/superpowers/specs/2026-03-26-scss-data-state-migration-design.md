@@ -20,7 +20,7 @@ Migrate the DateTimePeriodPicker component's styling methodology from plain CSS 
 | Theming | SCSS variables (local) | Matches production; POC uses local `_variables.scss` |
 | File organization | Single `styles.scss` + `_variables.scss` partial | Component is 266 lines of CSS; splitting further adds overhead without benefit |
 | Class prefix | Remove `dtp-` | SCSS nesting under `.datetime-period-picker` scopes everything |
-| Migration scope | Complete | All 14 modifier classes become data-state-* attributes |
+| Migration scope | Complete | All 16 modifier classes become data-state-* attributes or SCSS compound selectors |
 | Attribute removal pattern | `value \|\| undefined` | When false, attribute is removed from DOM entirely (not set to `"false"`) |
 
 ## File Structure
@@ -85,8 +85,6 @@ Root class `.datetime-period-picker` wraps everything. All child selectors are n
     &[data-state-align-right="true"] { /* right-align */ }
   }
 
-  .body { /* flex row for calendar + time-selector */ }
-
   .calendar { /* padding */ }
   .calendar-header { /* flex row for nav + title */ }
   .calendar-nav { /* prev/next buttons */ }
@@ -97,13 +95,20 @@ Root class `.datetime-period-picker` wraps everything. All child selectors are n
 
   .day {
     // base day cell
+    &:hover:not([data-state-disabled]):not([data-state-selected-start]):not([data-state-selected-end]) {
+      /* hover highlight (excludes disabled/selected via attribute selectors) */
+    }
     &[data-state-outside="true"] { /* muted color for other-month days */ }
     &[data-state-disabled="true"] { /* disabled state */ }
     &[data-state-today="true"] { /* today indicator */ }
     &[data-state-selected-start="true"] { /* start selection */ }
     &[data-state-selected-end="true"] { /* end selection */ }
     &[data-state-focused="true"] { /* keyboard focus indicator */ }
-    &[data-state-in-range="true"] { /* range background */ }
+    &[data-state-in-range="true"] {
+      /* range background */
+      &[data-state-selected-start="true"] { border-radius: 6px 0 0 6px; }
+      &[data-state-selected-end="true"] { border-radius: 0 6px 6px 0; }
+    }
     &[data-state-hover-preview="true"] { /* preview of range being selected */ }
   }
 
@@ -113,7 +118,10 @@ Root class `.datetime-period-picker` wraps everything. All child selectors are n
 
   .time-group { /* column container for label + scrollable list */ }
   .time-label { /* "Hora" / "Minuto" heading */ }
-  .time-column { /* scrollable list container */ }
+  .time-column {
+    /* scrollable list container */
+    &::-webkit-scrollbar { /* custom scrollbar styling */ }
+  }
 
   .time-item {
     &[data-state-active="true"] { /* highlighted active time */ }
@@ -136,6 +144,8 @@ Root class `.datetime-period-picker` wraps everything. All child selectors are n
 | Day cell | `dtp-day--selected-end` | `data-state-selected-end` | Day matches `final` value |
 | Day cell | `dtp-day--focused` | `data-state-focused` | Day matches `focusedDate` (keyboard nav) |
 | Day cell | `dtp-day--in-range` | `data-state-in-range` | Day is between initial and final |
+| Day cell | `dtp-day--range-start` | Compound: `[data-state-in-range][data-state-selected-start]` | Range start gets left border-radius (CSS-only, no TSX attr) |
+| Day cell | `dtp-day--range-end` | Compound: `[data-state-in-range][data-state-selected-end]` | Range end gets right border-radius (CSS-only, no TSX attr) |
 | Day cell | `dtp-day--hover-preview` | `data-state-hover-preview` | Previewing range while hovering/navigating |
 | TimeSelector | `dtp-time-selector--disabled` | `data-state-disabled` | No active date selected |
 | TimeItem | `dtp-time-item--active` | `data-state-active` | Item matches current hour/minute |
@@ -147,24 +157,23 @@ All classes drop the `dtp-` prefix. SCSS nesting under `.datetime-period-picker`
 | Old class | New class |
 |---|---|
 | `dtp-wrapper` | `wrapper` |
-| `dtp-input-group` | `input-group` |
+| `dtp-inputs` | `input-group` |
 | `dtp-input` | `input` |
-| `dtp-separator` | `separator` |
+| `dtp-inputs-separator` | `separator` |
 | `dtp-dropdown` | `dropdown` |
 | `dtp-calendar` | `calendar` |
 | `dtp-calendar-header` | `calendar-header` |
 | `dtp-calendar-nav` | `calendar-nav` |
 | `dtp-calendar-title` | `calendar-title` |
-| `dtp-weekdays` | `weekdays` |
-| `dtp-weekday` | `weekday` |
-| `dtp-grid` | `grid` |
+| `dtp-calendar-weekdays` | `weekdays` |
+| `dtp-calendar-weekday` | `weekday` |
+| `dtp-calendar-grid` | `grid` |
 | `dtp-day` | `day` |
 | `dtp-time-selector` | `time-selector` |
 | `dtp-time-group` | `time-group` |
 | `dtp-time-label` | `time-label` |
 | `dtp-time-column` | `time-column` |
 | `dtp-time-item` | `time-item` |
-| `dtp-body` | `body` |
 
 ## TSX Changes
 
@@ -235,6 +244,8 @@ Tests that query by CSS class modifiers or check `toHaveClass` for modifiers nee
 | `use-keyboard-navigation.test.tsx` | `.dtp-day[data-focused]` → `.day[data-state-focused]`; element IDs `dtp-day-*` remain (those are IDs, not classes) |
 
 **Note:** The `aria-activedescendant` IDs (`dtp-day-${iso}`) are HTML element IDs, not CSS classes. They remain unchanged since they serve an accessibility purpose and are not part of the styling methodology.
+
+**Note:** The existing `data-focused` attribute on calendar day cells (used for test querying) is replaced by `data-state-focused` — there should not be both `data-focused` and `data-state-focused` on the same element after migration.
 
 ## Infrastructure
 
