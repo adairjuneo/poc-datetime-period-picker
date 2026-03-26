@@ -332,4 +332,40 @@ describe('DateTimePeriodPicker', () => {
       expect(screen.queryByLabelText('Selecionar hora')).not.toBeInTheDocument();
     });
   });
+
+  // --- Dual-focus behavior ---
+  describe('dual-focus keyboard navigation', () => {
+    it('Tab from initial to final keeps calendar open', async () => {
+      renderPicker();
+      const initialInput = screen.getByLabelText('Data inicial');
+      await userEvent.click(initialInput);
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+      // Tab to final input
+      await userEvent.tab();
+      const finalInput = screen.getByLabelText('Data final');
+      expect(document.activeElement).toBe(finalInput);
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    it('input has combobox role and ARIA attributes', async () => {
+      renderPicker();
+      const input = screen.getByLabelText('Data inicial');
+      expect(input).toHaveAttribute('role', 'combobox');
+      expect(input).toHaveAttribute('aria-haspopup', 'dialog');
+      expect(input).toHaveAttribute('aria-expanded', 'false');
+
+      await userEvent.click(input);
+      expect(input).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('Tab past final input closes calendar', async () => {
+      renderPicker();
+      await userEvent.click(screen.getByLabelText('Data inicial'));
+      await userEvent.tab(); // -> final
+      await userEvent.tab(); // -> outside component
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+  });
 });
