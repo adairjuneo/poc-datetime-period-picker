@@ -33,6 +33,10 @@ function createMockPicker(overrides: Partial<PickerContextValue> = {}): PickerCo
     setHoveredDate: vi.fn(),
     open: vi.fn(),
     close: vi.fn(),
+    focusedDate: null,
+    setFocusedDate: vi.fn(),
+    onInputKeyDown: vi.fn(),
+    setOnInputKeyDown: vi.fn(),
     ...overrides,
   };
 }

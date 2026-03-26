@@ -30,6 +30,14 @@ export type CalendarCell = {
   isCurrentMonth: boolean;
 };
 
+export type KeyboardEventLike = {
+  key: string;
+  preventDefault: () => void;
+  stopPropagation: () => void;
+};
+
+export type InputKeyDownHandler = (e: KeyboardEventLike, field: 'initial' | 'final') => void;
+
 export type PickerContextValue = {
   variant: Variant;
   min: Date | null;
@@ -41,6 +49,10 @@ export type PickerContextValue = {
   activeField: ActiveField;
   isOpen: boolean;
   hoveredDate: Date | null;
+  focusedDate: Date | null;
+  setFocusedDate: (date: Date | null) => void;
+  onInputKeyDown: InputKeyDownHandler;
+  setOnInputKeyDown: (fn: InputKeyDownHandler) => void;
   setViewDate: (date: Date) => void;
   navigateMonth: (direction: 1 | -1) => void;
   navigateYear: (direction: 1 | -1) => void;

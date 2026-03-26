@@ -4,6 +4,7 @@ import {
   useState,
   useCallback,
   useMemo,
+  useEffect,
   type ReactNode,
 } from "react";
 import { parseISO, addMonths, addYears, setHours, setMinutes } from "date-fns";
@@ -13,6 +14,7 @@ import type {
   PickerContextValue,
   ActiveField,
   Variant,
+  InputKeyDownHandler,
 } from "./types";
 
 const PickerContext = createContext<PickerContextValue | null>(null);
@@ -46,6 +48,11 @@ export function PickerProvider({ children, ...props }: PickerProviderProps) {
   const [activeField, setActiveField] = useState<ActiveField>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [hoveredDate, setHoveredDate] = useState<Date | null>(null);
+  const [focusedDate, setFocusedDate] = useState<Date | null>(null);
+  const [onInputKeyDown, setOnInputKeyDownState] = useState<InputKeyDownHandler>(() => () => {});
+  const setOnInputKeyDown = useCallback((fn: InputKeyDownHandler) => {
+    setOnInputKeyDownState(() => fn);
+  }, []);
 
   const fireChange = useCallback(
     (newInitial: Date | null, newFinal: Date | null) => {
@@ -147,6 +154,9 @@ export function PickerProvider({ children, ...props }: PickerProviderProps) {
     if (!disabled) {
       setIsOpen(true);
       if (initial) setViewDate(initial);
+      // Initialize focusedDate based on initial value or today
+      const fieldDate = initial ?? new Date();
+      setFocusedDate(fieldDate);
     }
   }, [disabled, initial]);
 
@@ -154,7 +164,16 @@ export function PickerProvider({ children, ...props }: PickerProviderProps) {
     setIsOpen(false);
     setActiveField(null);
     setHoveredDate(null);
+    setFocusedDate(null);
   }, []);
+
+  // Sync focusedDate when activeField changes (e.g. user tabs between inputs)
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally excluding initial/final; only sync on activeField change
+  useEffect(() => {
+    if (!isOpen || !activeField) return;
+    const date = activeField === 'initial' ? initial : final;
+    setFocusedDate(date ?? new Date());
+  }, [isOpen, activeField]);
 
   const value = useMemo<PickerContextValue>(
     () => ({
@@ -168,6 +187,10 @@ export function PickerProvider({ children, ...props }: PickerProviderProps) {
       activeField,
       isOpen,
       hoveredDate,
+      focusedDate,
+      setFocusedDate,
+      onInputKeyDown,
+      setOnInputKeyDown,
       setViewDate,
       navigateMonth,
       navigateYear,
@@ -190,6 +213,9 @@ export function PickerProvider({ children, ...props }: PickerProviderProps) {
       activeField,
       isOpen,
       hoveredDate,
+      focusedDate,
+      onInputKeyDown,
+      setOnInputKeyDown,
       navigateMonth,
       navigateYear,
       selectDate,
