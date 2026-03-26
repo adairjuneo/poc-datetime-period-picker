@@ -36,43 +36,14 @@ export function Calendar() {
     [picker.initial, picker.final, picker.hoveredDate, picker.focusedDate],
   );
 
-  const getDayClassName = useCallback(
-    (cell: (typeof grid)[number]) => {
-      const classes = ['dtp-day'];
-
-      if (!cell.isCurrentMonth) classes.push('dtp-day--outside');
-      if (isDisabled(cell.date)) classes.push('dtp-day--disabled');
-      if (isToday(cell.date)) classes.push('dtp-day--today');
-
-      if (picker.initial && isSameDay(cell.date, picker.initial)) {
-        classes.push('dtp-day--selected-start');
-      }
-      if (picker.final && isSameDay(cell.date, picker.final)) {
-        classes.push('dtp-day--selected-end');
-      }
-
-      if (picker.focusedDate && isSameDay(cell.date, picker.focusedDate)) {
-        classes.push('dtp-day--focused');
-      }
-
-      if (isInRange(cell.date)) {
-        classes.push('dtp-day--in-range');
-      }
-
-      // Hover preview when selecting final date
-      if (
-        picker.activeField === 'final' &&
-        picker.initial &&
-        !picker.final &&
-        (picker.hoveredDate || picker.focusedDate) &&
-        isInRange(cell.date)
-      ) {
-        classes.push('dtp-day--hover-preview');
-      }
-
-      return classes.join(' ');
-    },
-    [picker, isDisabled, isInRange],
+  const isHoverPreview = useCallback(
+    (date: Date) =>
+      picker.activeField === 'final' &&
+      picker.initial &&
+      !picker.final &&
+      (picker.hoveredDate || picker.focusedDate) &&
+      isInRange(date),
+    [picker, isInRange],
   );
 
   const handleDayClick = useCallback(
@@ -97,11 +68,11 @@ export function Calendar() {
   }, [picker]);
 
   return (
-    <div className="dtp-calendar">
-      <div className="dtp-calendar-header">
+    <div className="calendar">
+      <div className="calendar-header">
         <button
           type="button"
-          className="dtp-calendar-nav"
+          className="calendar-nav"
           onClick={() => picker.navigateMonth(-1)}
           onMouseDown={(e) => e.preventDefault()}
           tabIndex={-1}
@@ -109,10 +80,10 @@ export function Calendar() {
         >
           &#8249;
         </button>
-        <span className="dtp-calendar-title">{monthLabel}</span>
+        <span className="calendar-title">{monthLabel}</span>
         <button
           type="button"
-          className="dtp-calendar-nav"
+          className="calendar-nav"
           onClick={() => picker.navigateMonth(1)}
           onMouseDown={(e) => e.preventDefault()}
           tabIndex={-1}
@@ -122,23 +93,30 @@ export function Calendar() {
         </button>
       </div>
 
-      <div className="dtp-calendar-weekdays">
+      <div className="weekdays">
         {DAYS_OF_WEEK.map((day) => (
-          <span key={day} className="dtp-calendar-weekday">
+          <span key={day} className="weekday">
             {day}
           </span>
         ))}
       </div>
 
-      <div className="dtp-calendar-grid" role="grid">
+      <div className="grid" role="grid">
         {grid.map((cell) => (
           <button
             key={cell.date.toISOString()}
             id={`dtp-day-${cell.date.toISOString()}`}
             type="button"
-            className={getDayClassName(cell)}
+            className="day"
             data-date={cell.date.toISOString()}
-            data-focused={picker.focusedDate && isSameDay(cell.date, picker.focusedDate) ? true : undefined}
+            data-state-outside={!cell.isCurrentMonth || undefined}
+            data-state-disabled={isDisabled(cell.date) || undefined}
+            data-state-today={isToday(cell.date) || undefined}
+            data-state-selected-start={(picker.initial && isSameDay(cell.date, picker.initial)) || undefined}
+            data-state-selected-end={(picker.final && isSameDay(cell.date, picker.final)) || undefined}
+            data-state-focused={(picker.focusedDate && isSameDay(cell.date, picker.focusedDate)) || undefined}
+            data-state-in-range={isInRange(cell.date) || undefined}
+            data-state-hover-preview={isHoverPreview(cell.date) || undefined}
             onClick={() => handleDayClick(cell.date)}
             onMouseEnter={() => handleDayHover(cell.date)}
             onMouseLeave={handleDayLeave}
