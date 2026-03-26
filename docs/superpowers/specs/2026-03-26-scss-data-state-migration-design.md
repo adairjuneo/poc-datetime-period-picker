@@ -156,7 +156,7 @@ All classes drop the `dtp-` prefix. SCSS nesting under `.datetime-period-picker`
 
 | Old class | New class |
 |---|---|
-| `dtp-wrapper` | `wrapper` |
+| `dtp-wrapper` | `datetime-period-picker` (root scoping class) |
 | `dtp-inputs` | `input-group` |
 | `dtp-input` | `input` |
 | `dtp-inputs-separator` | `separator` |
