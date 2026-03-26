@@ -79,9 +79,13 @@ Attached to each `<input>` via context (see PickerShell section).
 
 | Key | Condition | Action |
 |-----|-----------|--------|
-| `Enter` | `isOpen && focusedDate != null` | Call `selectDate(focusedDate)`. If `field === 'initial'`, auto-advance to final input via `requestAnimationFrame`. |
+| `Enter` | `isOpen && focusedDate != null` | Call `selectDate(focusedDate)`. Works for both `initial` and `final` fields. |
 
-**Auto-advance detail:** After `selectDate`, if `field === 'initial'`, schedule `requestAnimationFrame(() => finalInputRef.focus())`. This only applies to calendar-based selection (Enter/click), NOT manual typing (the mask's `onComplete` handles typed dates separately without auto-advance).
+**Auto-advance:** When `field === 'initial'`, `selectDate` already calls `setActiveField('final')` internally, and `DateInput` has an existing `useEffect` that auto-focuses the input when `isActive` becomes true. No additional `requestAnimationFrame` or ref wiring is needed — the existing mechanism handles the focus transfer.
+
+When `field === 'final'`, `selectDate` closes the dropdown (existing behavior). No special handling needed.
+
+**Note:** Auto-advance only applies to calendar-based selection (Enter/click), NOT manual typing — the mask's `onComplete` handles typed dates separately and the existing `selectDate` flow manages the field transition.
 
 ### Changes to Calendar (`calendar.tsx`)
 
