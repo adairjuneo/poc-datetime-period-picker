@@ -1,22 +1,15 @@
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 import {
   isSameDay,
   isAfter,
   isBefore,
   isToday,
-  addDays,
-  subDays,
-  addWeeks,
-  subWeeks,
-  startOfMonth,
-  endOfMonth,
 } from 'date-fns';
 import { usePicker } from './context';
 import { DAYS_OF_WEEK, MONTHS, buildCalendarGrid } from './constants';
 
 export function Calendar() {
   const picker = usePicker();
-  const gridRef = useRef<HTMLDivElement>(null);
   const grid = buildCalendarGrid(picker.viewDate);
   const currentMonth = picker.viewDate.getMonth();
   const currentYear = picker.viewDate.getFullYear();
@@ -34,13 +27,13 @@ export function Calendar() {
   const isInRange = useCallback(
     (date: Date) => {
       const start = picker.initial;
-      const end = picker.final ?? picker.hoveredDate;
+      const end = picker.final ?? picker.hoveredDate ?? picker.focusedDate;
       if (!start || !end) return false;
 
       const [rangeStart, rangeEnd] = isBefore(start, end) ? [start, end] : [end, start];
       return isAfter(date, rangeStart) && isBefore(date, rangeEnd);
     },
-    [picker.initial, picker.final, picker.hoveredDate],
+    [picker.initial, picker.final, picker.hoveredDate, picker.focusedDate],
   );
 
   const getDayClassName = useCallback(
@@ -57,6 +50,11 @@ export function Calendar() {
       if (picker.final && isSameDay(cell.date, picker.final)) {
         classes.push('dtp-day--selected-end');
       }
+
+      if (picker.focusedDate && isSameDay(cell.date, picker.focusedDate)) {
+        classes.push('dtp-day--focused');
+      }
+
       if (isInRange(cell.date)) {
         classes.push('dtp-day--in-range');
       }
@@ -66,7 +64,7 @@ export function Calendar() {
         picker.activeField === 'final' &&
         picker.initial &&
         !picker.final &&
-        picker.hoveredDate &&
+        (picker.hoveredDate || picker.focusedDate) &&
         isInRange(cell.date)
       ) {
         classes.push('dtp-day--hover-preview');
@@ -98,70 +96,6 @@ export function Calendar() {
     picker.setHoveredDate(null);
   }, [picker]);
 
-  // Keyboard navigation
-  // NOTE: After setViewDate triggers re-render when crossing month boundary,
-  // the target button won't exist yet. A pendingFocusDate ref + useEffect
-  // would be needed for full cross-month keyboard nav. For now, the view
-  // navigates but focus may not follow across months.
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent, date: Date) => {
-      let nextDate: Date | null = null;
-
-      switch (e.key) {
-        case 'ArrowLeft':
-          nextDate = subDays(date, 1);
-          break;
-        case 'ArrowRight':
-          nextDate = addDays(date, 1);
-          break;
-        case 'ArrowUp':
-          nextDate = subWeeks(date, 1);
-          break;
-        case 'ArrowDown':
-          nextDate = addWeeks(date, 1);
-          break;
-        case 'Home':
-          nextDate = startOfMonth(picker.viewDate);
-          break;
-        case 'End':
-          nextDate = endOfMonth(picker.viewDate);
-          break;
-        case 'PageUp':
-          e.preventDefault();
-          picker.navigateMonth(-1);
-          return;
-        case 'PageDown':
-          e.preventDefault();
-          picker.navigateMonth(1);
-          return;
-        case 'Enter':
-        case ' ':
-          e.preventDefault();
-          handleDayClick(date);
-          return;
-        case 'Escape':
-          picker.close();
-          return;
-        default:
-          return;
-      }
-
-      if (nextDate) {
-        e.preventDefault();
-        const dayStr = nextDate.toISOString();
-        const btn = gridRef.current?.querySelector(`[data-date="${dayStr}"]`) as HTMLButtonElement;
-        if (btn) {
-          btn.focus();
-        } else {
-          if (nextDate.getMonth() !== picker.viewDate.getMonth()) {
-            picker.setViewDate(nextDate);
-          }
-        }
-      }
-    },
-    [picker, handleDayClick],
-  );
-
   return (
     <div className="dtp-calendar">
       <div className="dtp-calendar-header">
@@ -169,6 +103,8 @@ export function Calendar() {
           type="button"
           className="dtp-calendar-nav"
           onClick={() => picker.navigateMonth(-1)}
+          onMouseDown={(e) => e.preventDefault()}
+          tabIndex={-1}
           aria-label="Mês anterior"
         >
           &#8249;
@@ -178,6 +114,8 @@ export function Calendar() {
           type="button"
           className="dtp-calendar-nav"
           onClick={() => picker.navigateMonth(1)}
+          onMouseDown={(e) => e.preventDefault()}
+          tabIndex={-1}
           aria-label="Próximo mês"
         >
           &#8250;
@@ -192,18 +130,20 @@ export function Calendar() {
         ))}
       </div>
 
-      <div ref={gridRef} className="dtp-calendar-grid" role="grid">
+      <div className="dtp-calendar-grid" role="grid">
         {grid.map((cell) => (
           <button
             key={cell.date.toISOString()}
+            id={`dtp-day-${cell.date.toISOString()}`}
             type="button"
             className={getDayClassName(cell)}
             data-date={cell.date.toISOString()}
+            data-focused={picker.focusedDate && isSameDay(cell.date, picker.focusedDate) ? true : undefined}
             onClick={() => handleDayClick(cell.date)}
             onMouseEnter={() => handleDayHover(cell.date)}
             onMouseLeave={handleDayLeave}
-            onKeyDown={(e) => handleKeyDown(e, cell.date)}
-            tabIndex={isSameDay(cell.date, picker.initial ?? picker.viewDate) ? 0 : -1}
+            onMouseDown={(e) => e.preventDefault()}
+            tabIndex={-1}
             disabled={isDisabled(cell.date)}
             aria-label={cell.date.toLocaleDateString('pt-BR', {
               day: 'numeric',

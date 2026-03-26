@@ -18,6 +18,11 @@ export function DateInput({ field, placeholder }: DateInputProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [hasError, setHasError] = useState(false);
 
+  const focusedDateId =
+    picker.isOpen && isActive && picker.focusedDate
+      ? `dtp-day-${picker.focusedDate.toISOString()}`
+      : undefined;
+
   // Sync external controlled value when not focused
   useEffect(() => {
     if (!isFocused) {
@@ -69,6 +74,13 @@ export function DateInput({ field, placeholder }: DateInputProps) {
     [field, picker],
   );
 
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      picker.onInputKeyDown(e, field);
+    },
+    [picker, field],
+  );
+
   const displayValue = isFocused ? localValue : formatDatePtBr(dateValue, picker.variant);
   const defaultPlaceholder = picker.variant === 'datetime' ? 'DD/MM/AAAA HH:mm' : 'DD/MM/AAAA';
   const maxLength = picker.variant === 'datetime' ? 16 : 10;
@@ -94,6 +106,11 @@ export function DateInput({ field, placeholder }: DateInputProps) {
       onBlur={handleBlur}
       onChange={handleChange}
       onPaste={handlePaste}
+      onKeyDown={handleKeyDown}
+      role="combobox"
+      aria-haspopup="dialog"
+      aria-expanded={picker.isOpen && isActive}
+      aria-activedescendant={focusedDateId}
       aria-label={field === 'initial' ? 'Data inicial' : 'Data final'}
       data-field={field}
     />

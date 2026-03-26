@@ -1,9 +1,10 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 import { PickerProvider, usePicker } from './context';
 import { DateInput } from './date-input';
 import { Dropdown } from './dropdown';
 import { Calendar } from './calendar';
 import { TimeSelector } from './time-selector';
+import { useKeyboardNavigation } from './use-keyboard-navigation';
 import type { DateTimePeriodPickerProps } from './types';
 import './styles.css';
 
@@ -13,6 +14,11 @@ function PickerShell({ variant, placeholder }: { variant: 'date' | 'datetime'; p
   const picker = usePicker();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const anchorRef = useRef<HTMLDivElement>(null);
+  const { handleContainerKeyDown, handleInputKeyDown } = useKeyboardNavigation();
+
+  useEffect(() => {
+    picker.setOnInputKeyDown(handleInputKeyDown);
+  }, [handleInputKeyDown, picker.setOnInputKeyDown]);
 
   // Close dropdown when focus leaves the entire component
   const handleBlur = useCallback(
@@ -24,15 +30,17 @@ function PickerShell({ variant, placeholder }: { variant: 'date' | 'datetime'; p
     [picker],
   );
 
-  // Handle Escape scoped to this component only
+  // Handle Escape scoped to this component, then delegate to keyboard navigation hook
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Escape' && picker.isOpen) {
         e.stopPropagation();
         picker.close();
+        return;
       }
+      handleContainerKeyDown(e);
     },
-    [picker],
+    [picker, handleContainerKeyDown],
   );
 
   return (
