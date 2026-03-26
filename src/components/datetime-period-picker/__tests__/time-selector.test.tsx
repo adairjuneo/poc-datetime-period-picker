@@ -91,7 +91,7 @@ describe('TimeSelector', () => {
 
     // Hour 14 should be active
     expect(options[14]).toHaveAttribute('aria-selected', 'true');
-    expect(options[14]).toHaveClass('dtp-time-item--active');
+    expect(options[14]).toHaveAttribute('data-state-active');
     expect(options[0]).toHaveAttribute('aria-selected', 'false');
   });
 
@@ -107,7 +107,7 @@ describe('TimeSelector', () => {
 
     // Minute 30 should be active
     expect(options[30]).toHaveAttribute('aria-selected', 'true');
-    expect(options[30]).toHaveClass('dtp-time-item--active');
+    expect(options[30]).toHaveAttribute('data-state-active');
   });
 
   it('uses final date when activeField is final', () => {
@@ -133,7 +133,7 @@ describe('TimeSelector', () => {
     }));
     const { container } = render(<TimeSelector />);
 
-    expect(container.firstChild).toHaveClass('dtp-time-selector--disabled');
+    expect(container.firstChild).toHaveAttribute('data-state-disabled');
   });
 
   it('calls setTime with selected hour on click', async () => {
@@ -194,12 +194,12 @@ describe('TimeSelector', () => {
     const hourColumn = screen.getByRole('listbox', { name: 'Selecionar hora' });
     const hourOptions = hourColumn.querySelectorAll('[role="option"]');
     expect(hourOptions[3].textContent).toBe('03');
-    expect(hourOptions[3]).toHaveClass('dtp-time-item--active');
+    expect(hourOptions[3]).toHaveAttribute('data-state-active');
 
     const minuteColumn = screen.getByRole('listbox', { name: 'Selecionar minuto' });
     const minuteOptions = minuteColumn.querySelectorAll('[role="option"]');
     expect(minuteOptions[5].textContent).toBe('05');
-    expect(minuteOptions[5]).toHaveClass('dtp-time-item--active');
+    expect(minuteOptions[5]).toHaveAttribute('data-state-active');
   });
 
   it('sets tabIndex -1 on all items (focus stays on inputs)', () => {

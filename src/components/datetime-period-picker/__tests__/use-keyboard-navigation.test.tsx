@@ -71,7 +71,7 @@ function findCurrentMonthDay(dayNumber: number): HTMLElement {
   const dayText = String(dayNumber);
   const allButtons = screen.getAllByText(dayText);
   const found = allButtons.find(
-    (btn) => btn.classList.contains('dtp-day') && !btn.classList.contains('dtp-day--outside'),
+    (btn) => btn.classList.contains('day') && !btn.hasAttribute('data-state-outside'),
   );
   if (!found) throw new Error(`Could not find current-month day button for day ${dayNumber}`);
   return found;
@@ -85,46 +85,46 @@ describe('useKeyboardNavigation', () => {
       const input = await openCalendar();
 
       // focusedDate starts at March 15
-      expect(findCurrentMonthDay(15)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(15)).toHaveAttribute('data-state-focused');
 
       fireEvent.keyDown(input, { key: 'ArrowRight' });
 
-      expect(findCurrentMonthDay(16)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(16)).toHaveAttribute('data-state-focused');
       // Day 15 should no longer be focused
-      expect(findCurrentMonthDay(15)).not.toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(15)).not.toHaveAttribute('data-state-focused');
     });
 
     it('ArrowLeft moves focused day backward by 1', async () => {
       renderForKeyNav();
       const input = await openCalendar();
 
-      expect(findCurrentMonthDay(15)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(15)).toHaveAttribute('data-state-focused');
 
       fireEvent.keyDown(input, { key: 'ArrowLeft' });
 
-      expect(findCurrentMonthDay(14)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(14)).toHaveAttribute('data-state-focused');
     });
 
     it('ArrowDown moves focused day forward by 7 (one week)', async () => {
       renderForKeyNav();
       const input = await openCalendar();
 
-      expect(findCurrentMonthDay(15)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(15)).toHaveAttribute('data-state-focused');
 
       fireEvent.keyDown(input, { key: 'ArrowDown' });
 
-      expect(findCurrentMonthDay(22)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(22)).toHaveAttribute('data-state-focused');
     });
 
     it('ArrowUp moves focused day backward by 7 (one week)', async () => {
       renderForKeyNav();
       const input = await openCalendar();
 
-      expect(findCurrentMonthDay(15)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(15)).toHaveAttribute('data-state-focused');
 
       fireEvent.keyDown(input, { key: 'ArrowUp' });
 
-      expect(findCurrentMonthDay(8)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(8)).toHaveAttribute('data-state-focused');
     });
   });
 
@@ -134,26 +134,26 @@ describe('useKeyboardNavigation', () => {
       renderForKeyNav();
       const input = await openCalendar();
 
-      expect(findCurrentMonthDay(15)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(15)).toHaveAttribute('data-state-focused');
 
       fireEvent.keyDown(input, { key: 'PageDown' });
 
       // Should now be April 15, and calendar should show "Abril 2026"
       expect(screen.getByText('Abril 2026')).toBeInTheDocument();
-      expect(findCurrentMonthDay(15)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(15)).toHaveAttribute('data-state-focused');
     });
 
     it('PageUp moves focused day backward by 1 month', async () => {
       renderForKeyNav();
       const input = await openCalendar();
 
-      expect(findCurrentMonthDay(15)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(15)).toHaveAttribute('data-state-focused');
 
       fireEvent.keyDown(input, { key: 'PageUp' });
 
       // Should now be February 15, and calendar should show "Fevereiro 2026"
       expect(screen.getByText('Fevereiro 2026')).toBeInTheDocument();
-      expect(findCurrentMonthDay(15)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(15)).toHaveAttribute('data-state-focused');
     });
 
     it('ArrowRight crossing month boundary updates calendar view', async () => {
@@ -164,13 +164,13 @@ describe('useKeyboardNavigation', () => {
       const input = await openCalendar();
 
       // Verify we start at day 31 (March has 31 days)
-      expect(findCurrentMonthDay(31)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(31)).toHaveAttribute('data-state-focused');
 
       fireEvent.keyDown(input, { key: 'ArrowRight' });
 
       // Should now be April 1, calendar view should update to April
       expect(screen.getByText('Abril 2026')).toBeInTheDocument();
-      expect(findCurrentMonthDay(1)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(1)).toHaveAttribute('data-state-focused');
     });
   });
 
@@ -181,24 +181,24 @@ describe('useKeyboardNavigation', () => {
       const input = await openCalendar();
 
       // focusedDate starts at March 15
-      expect(findCurrentMonthDay(15)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(15)).toHaveAttribute('data-state-focused');
 
       fireEvent.keyDown(input, { key: 'Home' });
 
       // Should move to March 1
-      expect(findCurrentMonthDay(1)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(1)).toHaveAttribute('data-state-focused');
     });
 
     it('End moves focus to end of displayed month', async () => {
       renderForKeyNav();
       const input = await openCalendar();
 
-      expect(findCurrentMonthDay(15)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(15)).toHaveAttribute('data-state-focused');
 
       fireEvent.keyDown(input, { key: 'End' });
 
       // March has 31 days
-      expect(findCurrentMonthDay(31)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(31)).toHaveAttribute('data-state-focused');
     });
   });
 
@@ -210,7 +210,7 @@ describe('useKeyboardNavigation', () => {
 
       // Move to March 16 first
       fireEvent.keyDown(input, { key: 'ArrowRight' });
-      expect(findCurrentMonthDay(16)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(16)).toHaveAttribute('data-state-focused');
 
       // Press Enter on the input to select the focused date
       fireEvent.keyDown(input, { key: 'Enter' });
@@ -247,16 +247,16 @@ describe('useKeyboardNavigation', () => {
       });
       const input = await openCalendar();
 
-      expect(findCurrentMonthDay(15)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(15)).toHaveAttribute('data-state-focused');
 
       // ArrowLeft would go to March 14 — but min is March 14, so 14 is allowed
       fireEvent.keyDown(input, { key: 'ArrowLeft' });
-      expect(findCurrentMonthDay(14)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(14)).toHaveAttribute('data-state-focused');
 
       // ArrowLeft again would go to March 13 — should be blocked by min
       fireEvent.keyDown(input, { key: 'ArrowLeft' });
       // Should stay on 14
-      expect(findCurrentMonthDay(14)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(14)).toHaveAttribute('data-state-focused');
     });
 
     it('blocks navigation past max date', async () => {
@@ -266,16 +266,16 @@ describe('useKeyboardNavigation', () => {
       });
       const input = await openCalendar();
 
-      expect(findCurrentMonthDay(15)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(15)).toHaveAttribute('data-state-focused');
 
       // ArrowRight to March 16 — max is 16, so allowed
       fireEvent.keyDown(input, { key: 'ArrowRight' });
-      expect(findCurrentMonthDay(16)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(16)).toHaveAttribute('data-state-focused');
 
       // ArrowRight again would go to March 17 — should be blocked by max
       fireEvent.keyDown(input, { key: 'ArrowRight' });
       // Should stay on 16
-      expect(findCurrentMonthDay(16)).toHaveAttribute('data-focused');
+      expect(findCurrentMonthDay(16)).toHaveAttribute('data-state-focused');
     });
   });
 
@@ -290,7 +290,7 @@ describe('useKeyboardNavigation', () => {
 
       // No dialog should appear, and there should be no focused day
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-      expect(document.querySelector('.dtp-day[data-focused]')).toBeNull();
+      expect(document.querySelector('.day[data-state-focused]')).toBeNull();
     });
   });
 });

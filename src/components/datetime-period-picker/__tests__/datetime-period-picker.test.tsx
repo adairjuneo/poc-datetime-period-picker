@@ -129,7 +129,7 @@ describe('DateTimePeriodPicker', () => {
       const day15Buttons = screen.getAllByText('15');
       // Click the first one that is in the current month (not disabled, not outside)
       const day15 = day15Buttons.find(
-        (btn) => !btn.classList.contains('dtp-day--outside'),
+        (btn) => !btn.hasAttribute('data-state-outside'),
       ) ?? day15Buttons[0];
       await userEvent.click(day15);
 
@@ -147,7 +147,7 @@ describe('DateTimePeriodPicker', () => {
       // Select day 10 from current month
       const day10Buttons = screen.getAllByText('10');
       const day10 = day10Buttons.find(
-        (btn) => !btn.classList.contains('dtp-day--outside'),
+        (btn) => !btn.hasAttribute('data-state-outside'),
       ) ?? day10Buttons[0];
       await userEvent.click(day10);
 
@@ -155,7 +155,7 @@ describe('DateTimePeriodPicker', () => {
       // Select day 20 from current month
       const day20Buttons = screen.getAllByText('20');
       const day20 = day20Buttons.find(
-        (btn) => !btn.classList.contains('dtp-day--outside'),
+        (btn) => !btn.hasAttribute('data-state-outside'),
       ) ?? day20Buttons[0];
       await userEvent.click(day20);
 
@@ -176,14 +176,14 @@ describe('DateTimePeriodPicker', () => {
       // Select day 20 first (initial)
       const day20Buttons = screen.getAllByText('20');
       const day20 = day20Buttons.find(
-        (btn) => !btn.classList.contains('dtp-day--outside'),
+        (btn) => !btn.hasAttribute('data-state-outside'),
       ) ?? day20Buttons[0];
       await userEvent.click(day20);
 
       // Select day 5 second (final) — should auto-sort
       const day5Buttons = screen.getAllByText('5');
       const day5 = day5Buttons.find(
-        (btn) => !btn.classList.contains('dtp-day--outside'),
+        (btn) => !btn.hasAttribute('data-state-outside'),
       ) ?? day5Buttons[0];
       await userEvent.click(day5);
 
@@ -243,7 +243,7 @@ describe('DateTimePeriodPicker', () => {
       // Day 10 of March should be disabled (before min of 15th)
       const day10Buttons = screen.getAllByText('10');
       const day10 = day10Buttons.find(
-        (btn) => !btn.classList.contains('dtp-day--outside'),
+        (btn) => !btn.hasAttribute('data-state-outside'),
       ) ?? day10Buttons[0];
       expect(day10).toBeDisabled();
     });
@@ -258,7 +258,7 @@ describe('DateTimePeriodPicker', () => {
       // Day 25 of March should be disabled (after max of 20th)
       const day25Buttons = screen.getAllByText('25');
       const day25 = day25Buttons.find(
-        (btn) => !btn.classList.contains('dtp-day--outside'),
+        (btn) => !btn.hasAttribute('data-state-outside'),
       ) ?? day25Buttons[0];
       expect(day25).toBeDisabled();
     });
