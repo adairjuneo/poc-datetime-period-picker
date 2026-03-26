@@ -1,0 +1,267 @@
+@use 'variables' as *;
+
+.datetime-period-picker {
+  // --- Wrapper ---
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  font-family: $font-sans;
+
+  // --- Inputs row ---
+  .input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .separator {
+    color: $text;
+    font-size: 14px;
+    user-select: none;
+  }
+
+  .input {
+    padding: 8px 12px;
+    border: 1px solid $border;
+    border-radius: 6px;
+    background: $bg;
+    color: $text-heading;
+    font-family: $font-mono;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s;
+    width: 140px;
+
+    &:focus,
+    &[data-state-active='true'] {
+      border-color: $accent;
+      box-shadow: 0 0 0 2px $accent-bg;
+    }
+
+    &[data-state-error='true'] {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  // --- Dropdown ---
+  .dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    margin-top: 4px;
+    background: $bg;
+    border: 1px solid $border;
+    border-radius: 10px;
+    box-shadow: $shadow;
+    padding: 12px;
+    width: 300px;
+
+    &[data-state-above='true'] {
+      top: auto;
+      bottom: 100%;
+      margin-top: 0;
+      margin-bottom: 4px;
+    }
+
+    &[data-state-align-right='true'] {
+      right: 0;
+    }
+  }
+
+  // --- Calendar ---
+  .calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .calendar-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    color: $text;
+    font-size: 16px;
+
+    &:hover {
+      background: $accent-bg;
+      color: $accent;
+    }
+  }
+
+  .calendar-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: $text-heading;
+    cursor: default;
+  }
+
+  .weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 4px;
+  }
+
+  .weekday {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 500;
+    color: $text;
+    padding: 4px 0;
+    user-select: none;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+  }
+
+  // --- Day cells ---
+  .day {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 1;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: $text-heading;
+    padding: 0;
+    transition: background 0.1s, color 0.1s;
+
+    &:hover:not([data-state-disabled='true']):not([data-state-selected-start='true']):not([data-state-selected-end='true']) {
+      background: $accent-bg;
+    }
+
+    &[data-state-outside='true'] {
+      color: $text;
+      opacity: 0.4;
+    }
+
+    &[data-state-disabled='true'] {
+      color: $text;
+      opacity: 0.25;
+      cursor: not-allowed;
+    }
+
+    &[data-state-today='true'] {
+      border: 1px solid $accent-border;
+    }
+
+    &[data-state-selected-start='true'],
+    &[data-state-selected-end='true'] {
+      background: $accent;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    &[data-state-in-range='true'] {
+      background: $accent-bg;
+      border-radius: 0;
+
+      &[data-state-selected-start='true'] {
+        border-radius: 6px 0 0 6px;
+      }
+
+      &[data-state-selected-end='true'] {
+        border-radius: 0 6px 6px 0;
+      }
+    }
+
+    &[data-state-hover-preview='true'] {
+      background: $accent-bg;
+      opacity: 0.6;
+    }
+
+    // focus-visible is not used — buttons don't receive real focus in dual-focus mode
+    &[data-state-focused='true'] {
+      outline: 2px solid $accent;
+      outline-offset: -2px;
+      background-color: color-mix(in srgb, $accent 10%, transparent);
+    }
+  }
+
+  // --- Time Selector ---
+  .time-selector {
+    display: flex;
+    gap: 12px;
+    padding-top: 12px;
+    margin-top: 12px;
+    border-top: 1px solid $border;
+    justify-content: center;
+
+    &[data-state-disabled='true'] {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+  }
+
+  .time-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .time-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: $text;
+    text-transform: uppercase;
+  }
+
+  .time-column {
+    height: 160px;
+    width: 48px;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    border: 1px solid $border;
+    border-radius: 8px;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .time-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    font-size: 13px;
+    font-family: $font-mono;
+    color: $text;
+    cursor: pointer;
+    scroll-snap-align: center;
+    transition: background 0.1s, color 0.1s;
+    user-select: none;
+
+    &:hover {
+      background: $accent-bg;
+    }
+
+    &[data-state-active='true'] {
+      background: $accent;
+      color: #fff;
+      font-weight: 600;
+    }
+  }
+}

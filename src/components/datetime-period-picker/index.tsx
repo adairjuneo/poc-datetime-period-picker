@@ -6,7 +6,7 @@ import { Calendar } from './calendar';
 import { TimeSelector } from './time-selector';
 import { useKeyboardNavigation } from './use-keyboard-navigation';
 import type { DateTimePeriodPickerProps } from './types';
-import './styles.css';
+import './styles.scss';
 
 export type { DatePeriod, DatePeriodChangeEvent, DateTimePeriodPickerProps } from './types';
 

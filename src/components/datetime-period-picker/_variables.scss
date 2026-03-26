@@ -1,0 +1,20 @@
+// Typography
+$font-sans: system-ui, -apple-system, sans-serif;
+$font-mono: 'SF Mono', 'Fira Code', monospace;
+
+// Colors
+$text: #1a1a2e;
+$text-heading: #0f0f23;
+$text-muted: #6b7280;
+$bg: #ffffff;
+$bg-subtle: #f8f9fa;
+$border: #e2e8f0;
+$accent: #2563eb;
+$accent-bg: #eff6ff;
+$accent-border: #bfdbfe;
+$shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+
+// Sizing
+$dropdown-max-height: 380px;
+$input-height: 2.25rem;
+$day-cell-size: 2rem;
