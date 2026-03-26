@@ -72,16 +72,15 @@ export function Dropdown({ anchorRef, children }: DropdownProps) {
 
   if (!picker.isOpen) return null;
 
-  const className = [
-    'dtp-dropdown',
-    position.above ? 'dtp-dropdown--above' : '',
-    position.alignRight ? 'dtp-dropdown--align-right' : '',
-  ]
-    .filter(Boolean)
-    .join(' ');
-
   return (
-    <div ref={dropdownRef} className={className} role="dialog" aria-label="Selecionar período">
+    <div
+      ref={dropdownRef}
+      className="dropdown"
+      data-state-above={position.above || undefined}
+      data-state-align-right={position.alignRight || undefined}
+      role="dialog"
+      aria-label="Selecionar período"
+    >
       {children}
     </div>
   );
