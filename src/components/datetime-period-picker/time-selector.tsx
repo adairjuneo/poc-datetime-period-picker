@@ -1,5 +1,4 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { getHours, getMinutes } from 'date-fns';
 import { usePicker } from './context';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
@@ -11,8 +10,8 @@ export function TimeSelector() {
   const minutesRef = useRef<HTMLDivElement>(null);
 
   const activeDate = activeField === 'initial' ? initial : final;
-  const currentHours = activeDate ? getHours(activeDate) : 0;
-  const currentMinutes = activeDate ? getMinutes(activeDate) : 0;
+  const currentHours = activeDate ? activeDate.getHours() : 0;
+  const currentMinutes = activeDate ? activeDate.getMinutes() : 0;
   const isDisabled = !activeDate;
 
   // Scroll to active item on mount and when value changes
