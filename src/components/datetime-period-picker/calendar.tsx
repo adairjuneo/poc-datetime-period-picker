@@ -1,10 +1,5 @@
 import { useCallback } from 'react';
-import {
-  isSameDay,
-  isAfter,
-  isBefore,
-  isToday,
-} from 'date-fns';
+import moment from 'moment';
 import { usePicker } from './context';
 import { DAYS_OF_WEEK, MONTHS, buildCalendarGrid } from './constants';
 
@@ -17,8 +12,8 @@ export function Calendar() {
 
   const isDisabled = useCallback(
     (date: Date) => {
-      if (picker.min && isBefore(date, picker.min)) return true;
-      if (picker.max && isAfter(date, picker.max)) return true;
+      if (picker.min && moment(date).isBefore(picker.min)) return true;
+      if (picker.max && moment(date).isAfter(picker.max)) return true;
       return false;
     },
     [picker.min, picker.max],
@@ -30,8 +25,8 @@ export function Calendar() {
       const end = picker.final ?? picker.hoveredDate ?? picker.focusedDate;
       if (!start || !end) return false;
 
-      const [rangeStart, rangeEnd] = isBefore(start, end) ? [start, end] : [end, start];
-      return isAfter(date, rangeStart) && isBefore(date, rangeEnd);
+      const [rangeStart, rangeEnd] = moment(start).isBefore(end) ? [start, end] : [end, start];
+      return moment(date).isAfter(rangeStart) && moment(date).isBefore(rangeEnd);
     },
     [picker.initial, picker.final, picker.hoveredDate, picker.focusedDate],
   );
@@ -111,10 +106,10 @@ export function Calendar() {
             data-date={cell.date.toISOString()}
             data-state-outside={!cell.isCurrentMonth || undefined}
             data-state-disabled={isDisabled(cell.date) || undefined}
-            data-state-today={isToday(cell.date) || undefined}
-            data-state-selected-start={(picker.initial && isSameDay(cell.date, picker.initial)) || undefined}
-            data-state-selected-end={(picker.final && isSameDay(cell.date, picker.final)) || undefined}
-            data-state-focused={(picker.focusedDate && isSameDay(cell.date, picker.focusedDate)) || undefined}
+            data-state-today={moment(cell.date).isSame(moment(), 'day') || undefined}
+            data-state-selected-start={(picker.initial && moment(cell.date).isSame(picker.initial, 'day')) || undefined}
+            data-state-selected-end={(picker.final && moment(cell.date).isSame(picker.final, 'day')) || undefined}
+            data-state-focused={(picker.focusedDate && moment(cell.date).isSame(picker.focusedDate, 'day')) || undefined}
             data-state-in-range={isInRange(cell.date) || undefined}
             data-state-hover-preview={isHoverPreview(cell.date) || undefined}
             onClick={() => handleDayClick(cell.date)}
@@ -129,8 +124,8 @@ export function Calendar() {
               year: 'numeric',
             })}
             aria-selected={
-              (picker.initial && isSameDay(cell.date, picker.initial)) ||
-              (picker.final && isSameDay(cell.date, picker.final)) ||
+              (picker.initial && moment(cell.date).isSame(picker.initial, 'day')) ||
+              (picker.final && moment(cell.date).isSame(picker.final, 'day')) ||
               false
             }
           >
