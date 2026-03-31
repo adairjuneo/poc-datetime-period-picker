@@ -28,10 +28,10 @@ describe('constants', () => {
   });
 
   it('format string constants have expected values', () => {
-    expect(DATE_FORMAT_DISPLAY).toBe('dd/MM/yyyy');
-    expect(DATETIME_FORMAT_DISPLAY).toBe('dd/MM/yyyy HH:mm');
-    expect(DATE_FORMAT_ISO).toBe('yyyy-MM-dd');
-    expect(DATETIME_FORMAT_ISO).toBe("yyyy-MM-dd'T'HH:mm");
+    expect(DATE_FORMAT_DISPLAY).toBe('DD/MM/YYYY');
+    expect(DATETIME_FORMAT_DISPLAY).toBe('DD/MM/YYYY HH:mm');
+    expect(DATE_FORMAT_ISO).toBe('YYYY-MM-DD');
+    expect(DATETIME_FORMAT_ISO).toBe('YYYY-MM-DD[T]HH:mm');
   });
 });
 
