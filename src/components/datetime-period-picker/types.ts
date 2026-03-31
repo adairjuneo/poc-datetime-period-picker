@@ -59,6 +59,7 @@ export type PickerContextValue = {
   setTime: (field: ActiveField, hours: number, minutes: number) => void;
   setActiveField: (field: ActiveField) => void;
   updateFromInput: (field: ActiveField, raw: string) => void;
+  clearField: (field: ActiveField) => void;
   setHoveredDate: (date: Date | null) => void;
   open: () => void;
   close: () => void;

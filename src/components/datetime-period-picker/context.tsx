@@ -150,6 +150,22 @@ export function PickerProvider({ children, ...props }: PickerProviderProps) {
     [variant, min, max, initial, final, fireChange],
   );
 
+  const clearField = useCallback(
+    (field: ActiveField) => {
+      if (!field) return;
+
+      if (field === 'initial') {
+        fireChange(null, final);
+      } else {
+        fireChange(initial, null);
+      }
+
+      setViewDate(new Date());
+      setFocusedDate(new Date());
+    },
+    [initial, final, fireChange],
+  );
+
   const open = useCallback(() => {
     if (!disabled) {
       setIsOpen(true);
@@ -199,6 +215,7 @@ export function PickerProvider({ children, ...props }: PickerProviderProps) {
       setTime: setTimeAction,
       setActiveField,
       updateFromInput,
+      clearField,
       setHoveredDate,
       open,
       close,
@@ -222,6 +239,7 @@ export function PickerProvider({ children, ...props }: PickerProviderProps) {
       selectDate,
       setTimeAction,
       updateFromInput,
+      clearField,
       open,
       close,
     ],
