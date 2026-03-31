@@ -78,52 +78,40 @@ Two mask configurations, one per variant:
 
 ### useIMask Hook Integration
 
-The `useIMask` hook returns:
-- `ref` — assigned to the `<input>` element (replaces manual `inputRef`)
-- `value` — the current masked display string
-- `setValue` — programmatic setter for syncing external changes
-- `unmaskedValue` — raw digits without separators (for completeness checks)
+Canonical hook call with all used return values:
 
 ```typescript
-const { ref: maskRef, value, setValue, unmaskedValue } = useIMask(maskOptions, {
-  onAccept: (maskedValue: string) => {
-    picker.updateFromInput(field, maskedValue);
+const inputRef = useRef<HTMLInputElement>(null);
+
+const { ref: maskRef, setValue, unmaskedValue } = useIMask(maskOptions, {
+  ref: inputRef,
+  onAccept: (value: string, maskRef: InputMask) => {
+    if (isExternalUpdate.current) return;  // guard against re-entrancy (see below)
+    picker.updateFromInput(field, value);
   },
 });
 ```
 
-### Ref Merging
+Return values used:
+- `ref` (aliased `maskRef`) — assigned to the `<input>` element; same reference as `inputRef`
+- `setValue` — programmatic setter for syncing external changes (calendar selection, prop changes)
+- `unmaskedValue` — raw digits without separators (for completeness checks on blur)
 
-The component needs two refs on the `<input>`:
-1. iMask's `ref` (for mask controller attachment)
-2. An internal `inputRef` (for programmatic `.focus()` calls in auto-focus logic)
+### Ref Sharing
 
-A simple `mergeRefs` utility combines them:
+The component needs a ref on the `<input>` for both iMask (mask controller) and our auto-focus logic (programmatic `.focus()` calls).
 
-```typescript
-function mergeRefs<T>(...refs: Array<React.Ref<T> | undefined>) {
-  return (instance: T | null) => {
-    refs.forEach((ref) => {
-      if (typeof ref === 'function') ref(instance);
-      else if (ref && typeof ref === 'object') {
-        (ref as React.MutableRefObject<T | null>).current = instance;
-      }
-    });
-  };
-}
-```
-
-The merged ref is passed to the `<input>` element, and the iMask hook receives the merged ref via its `ref` option:
+`useIMask` accepts a `ref` in its second argument. When provided, the hook attaches its mask controller to that ref instead of creating its own. This way both iMask and our auto-focus code share the same ref:
 
 ```typescript
 const inputRef = useRef<HTMLInputElement>(null);
-const { ref: maskRef, value, setValue } = useIMask(maskOptions, {
-  ref: inputRef,   // iMask attaches to this ref
-  onAccept: ...,
+const { ref: maskRef, setValue, unmaskedValue } = useIMask(maskOptions, {
+  ref: inputRef,
+  onAccept: (value: string, maskRef: InputMask) => { ... },
 });
+// maskRef === inputRef — same reference
+// Assign maskRef to the <input> element
 ```
-
-Actually, `useIMask` accepts a `ref` in its second argument that it will use instead of creating its own. This way both iMask and our auto-focus code share the same ref. The hook returns a `ref` that is the same reference. We assign it to the `<input>`.
 
 ### Bidirectional Data Flow
 
@@ -134,11 +122,16 @@ Actually, `useIMask` accepts a `ref` in its second argument that it will use ins
 4. `onAccept` calls `picker.updateFromInput(field, maskedValue)`
 5. `updateFromInput` in context parses via `parseDatePtBr` — if valid and complete, fires `onChange`
 
-**Calendar/external → input:**
+**Calendar/external → input (with re-entrancy guard):**
 1. User clicks a day in the calendar, or parent component changes `props.value`
 2. `dateValue` (derived from props) changes
-3. Existing `useEffect` detects the change and calls `setValue(formatDatePtBr(dateValue, variant))`
-4. iMask updates its internal state and the input displays the new value
+3. `useEffect` sets `isExternalUpdate.current = true`
+4. Calls `setValue(formatDatePtBr(dateValue, variant))`
+5. iMask processes the value and fires `onAccept`
+6. `onAccept` checks `isExternalUpdate.current` — since it's `true`, returns early (no redundant `updateFromInput` call)
+7. `useEffect` resets `isExternalUpdate.current = false`
+
+This guard ref (`isExternalUpdate = useRef(false)`) prevents a re-entrancy loop where external value changes would trigger `onAccept` → `updateFromInput` → `fireChange` → `onChange` → parent re-renders with same value. The guard is a simple boolean ref, not state, so it doesn't cause re-renders.
 
 **Blur with incomplete input:**
 1. User tabs away with partial input (e.g., `"25/03/____"`)
@@ -184,6 +177,7 @@ After:
 ```tsx
 <input
   ref={maskRef}
+  disabled={picker.disabled}
   onFocus={handleFocus}
   onBlur={handleBlur}
   onKeyDown={handleKeyDown}
@@ -191,7 +185,7 @@ After:
 />
 ```
 
-Note: `value` is controlled by iMask via the ref — we do NOT pass a `value` prop.
+Note: `value` is controlled by iMask via the ref — we do NOT pass a `value` prop. The `placeholder` prop on `DateInput` becomes unused since `lazy: false` makes iMask show `__/__/____` directly in the input value. The `placeholder` prop will be removed from `DateInputProps`.
 
 ### Test Impact
 
