@@ -82,18 +82,3 @@ export function buildCalendarGrid(viewDate: Date): CalendarCell[] {
 export function sortPeriod(a: Date, b: Date): [Date, Date] {
   return moment(a).isBefore(b) ? [a, b] : [b, a];
 }
-
-export function applyMask(raw: string, variant: Variant): string {
-  const digits = raw.replace(/\D/g, "");
-  const maxDigits = variant === "datetime" ? 12 : 8;
-  const trimmed = digits.slice(0, maxDigits);
-
-  let result = "";
-  for (let i = 0; i < trimmed.length; i++) {
-    if (i === 2 || i === 4) result += "/";
-    if (i === 8) result += " ";
-    if (i === 10) result += ":";
-    result += trimmed[i];
-  }
-  return result;
-}

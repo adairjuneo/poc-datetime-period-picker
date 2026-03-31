@@ -12,7 +12,6 @@ import {
   isValidDate,
   buildCalendarGrid,
   sortPeriod,
-  applyMask,
 } from '../constants';
 
 describe('constants', () => {
@@ -143,27 +142,5 @@ describe('sortPeriod', () => {
     const [start, end] = sortPeriod(a, b);
     expect(start).toBe(b);
     expect(end).toBe(a);
-  });
-});
-
-describe('applyMask', () => {
-  it('inserts slashes for date format', () => {
-    expect(applyMask('25032026', 'date')).toBe('25/03/2026');
-  });
-
-  it('inserts slashes, space and colon for datetime format', () => {
-    expect(applyMask('250320261430', 'datetime')).toBe('25/03/2026 14:30');
-  });
-
-  it('strips non-numeric characters', () => {
-    expect(applyMask('25/03/2026', 'date')).toBe('25/03/2026');
-  });
-
-  it('handles partial input', () => {
-    expect(applyMask('250', 'date')).toBe('25/0');
-  });
-
-  it('truncates excess digits', () => {
-    expect(applyMask('250320261234', 'date')).toBe('25/03/2026');
   });
 });
