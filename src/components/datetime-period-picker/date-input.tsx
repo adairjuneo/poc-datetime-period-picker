@@ -60,9 +60,15 @@ export function DateInput({ field }: DateInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const { ref: maskRef, setValue, unmaskedValue } = useIMask(maskOptions, {
     ref: inputRef,
-    onAccept: (value: string) => {
+    onAccept: (value: string, mask) => {
       if (isExternalUpdate.current) return;
       setHasError(false);
+
+      if (mask.unmaskedValue === '') {
+        picker.clearField(field as ActiveField);
+        return;
+      }
+
       picker.updateFromInput(field as ActiveField, value);
     },
   });
