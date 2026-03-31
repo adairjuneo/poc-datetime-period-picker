@@ -357,4 +357,122 @@ describe('DateTimePeriodPicker', () => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
   });
+
+  // --- Clear on empty ---
+  describe('clear on empty', () => {
+    /**
+     * Helper: select-all + delete to clear a masked input.
+     * userEvent.clear() may not reliably trigger iMask's onAccept,
+     * so we use tripleClick (select all) + Backspace instead.
+     */
+    async function clearInput(input: HTMLElement) {
+      await userEvent.tripleClick(input);
+      await userEvent.keyboard('{Backspace}');
+    }
+
+    it('emits onChange with empty initial when input is fully cleared', async () => {
+      const { onChange } = renderControlled({
+        value: { initial: '2026-03-25', final: '2026-03-28' },
+      });
+
+      const input = screen.getByLabelText('Data inicial');
+      await userEvent.click(input);
+      await clearInput(input);
+
+      const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
+      expect(lastCall.target.value.initial).toBe('');
+    });
+
+    it('emits onChange with empty final when input is fully cleared', async () => {
+      const { onChange } = renderControlled({
+        value: { initial: '2026-03-25', final: '2026-03-28' },
+      });
+
+      const input = screen.getByLabelText('Data final');
+      await userEvent.click(input);
+      await clearInput(input);
+
+      const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
+      expect(lastCall.target.value.final).toBe('');
+    });
+
+    it('clearing one field does not affect the other', async () => {
+      const { onChange } = renderControlled({
+        value: { initial: '2026-03-25', final: '2026-03-28' },
+      });
+
+      const input = screen.getByLabelText('Data inicial');
+      await userEvent.click(input);
+      await clearInput(input);
+
+      const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
+      expect(lastCall.target.value.initial).toBe('');
+      expect(lastCall.target.value.final).not.toBe('');
+    });
+
+    it('calendar removes selection highlight after clearing field', async () => {
+      const { onChange } = renderControlled({
+        value: { initial: '2026-03-25', final: '' },
+      });
+
+      const input = screen.getByLabelText('Data inicial');
+      await userEvent.click(input);
+
+      // Day 25 should be highlighted as selected-start
+      const day25Before = screen.getAllByText('25').find(
+        (btn) => btn.closest('[data-state-selected-start]'),
+      );
+      expect(day25Before).toBeTruthy();
+
+      // Clear the input
+      await clearInput(input);
+
+      // After clearing, no day 25 should have the selected-start attribute
+      // Re-query since the DOM may have updated. The calendar may still be
+      // open (dropdown stays open while input is focused).
+      const day25After = screen.getAllByText('25').filter(
+        (btn) => btn.closest('[data-state-selected-start]'),
+      );
+      expect(day25After).toHaveLength(0);
+
+      // Suppress unused-variable warning
+      void onChange;
+    });
+
+    it('partial clear does NOT emit empty value', async () => {
+      const { onChange } = renderControlled({
+        value: { initial: '2026-03-25', final: '' },
+      });
+
+      const input = screen.getByLabelText('Data inicial');
+      await userEvent.click(input);
+
+      // Record call count before partial clear
+      const callsBefore = onChange.mock.calls.length;
+
+      // Press Backspace once — partial delete, not a full clear
+      await userEvent.keyboard('{Backspace}');
+
+      // Check that no call was made with empty initial
+      const callsAfter = onChange.mock.calls.slice(callsBefore);
+      const emptyInitialCall = callsAfter.find(
+        (args: unknown[]) => (args[0] as DatePeriodChangeEvent).target.value.initial === '',
+      );
+      expect(emptyInitialCall).toBeUndefined();
+    });
+
+    it('datetime variant: emits onChange with empty when input is fully cleared', async () => {
+      const { onChange } = renderControlled({
+        variant: 'datetime',
+        value: { initial: '2026-03-25T14:30', final: '' },
+      });
+
+      const input = screen.getByLabelText('Data inicial');
+      await userEvent.click(input);
+      await clearInput(input);
+
+      const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
+      expect(lastCall.target.value.initial).toBe('');
+    });
+  });
 });
