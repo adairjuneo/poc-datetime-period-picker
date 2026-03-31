@@ -7,7 +7,7 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
-import { parseISO, addMonths, addYears, setHours, setMinutes } from "date-fns";
+import moment from "moment";
 import { formatToIso, parseDatePtBr, sortPeriod } from "./constants";
 import type {
   DateTimePeriodPickerProps,
@@ -33,15 +33,15 @@ export function PickerProvider({ children, ...props }: PickerProviderProps) {
 
   // Parse props.value ISO strings to Date | null (memoized to preserve referential equality)
   const initial = useMemo(
-    () => (props.value.initial ? parseISO(props.value.initial) : null),
+    () => (props.value.initial ? moment(props.value.initial).toDate() : null),
     [props.value.initial],
   );
   const final = useMemo(
-    () => (props.value.final ? parseISO(props.value.final) : null),
+    () => (props.value.final ? moment(props.value.final).toDate() : null),
     [props.value.final],
   );
-  const min = useMemo(() => (props.min ? parseISO(props.min) : null), [props.min]);
-  const max = useMemo(() => (props.max ? parseISO(props.max) : null), [props.max]);
+  const min = useMemo(() => (props.min ? moment(props.min).toDate() : null), [props.min]);
+  const max = useMemo(() => (props.max ? moment(props.max).toDate() : null), [props.max]);
 
   // Internal ephemeral state
   const [viewDate, setViewDate] = useState<Date>(() => initial ?? new Date());
@@ -75,11 +75,11 @@ export function PickerProvider({ children, ...props }: PickerProviderProps) {
   );
 
   const navigateMonth = useCallback((direction: 1 | -1) => {
-    setViewDate((prev) => addMonths(prev, direction));
+    setViewDate((prev) => moment(prev).add(direction, 'months').toDate());
   }, []);
 
   const navigateYear = useCallback((direction: 1 | -1) => {
-    setViewDate((prev) => addYears(prev, direction));
+    setViewDate((prev) => moment(prev).add(direction, 'years').toDate());
   }, []);
 
   const selectDate = useCallback(
@@ -90,20 +90,20 @@ export function PickerProvider({ children, ...props }: PickerProviderProps) {
         // Preserve existing time if datetime variant
         let newDate = date;
         if (variant === "datetime" && initial) {
-          newDate = setMinutes(
-            setHours(date, initial.getHours()),
-            initial.getMinutes(),
-          );
+          newDate = moment(date)
+            .hours(initial.getHours())
+            .minutes(initial.getMinutes())
+            .toDate();
         }
         fireChange(newDate, final);
         setActiveField("final");
       } else if (activeField === "final") {
         let newDate = date;
         if (variant === "datetime" && final) {
-          newDate = setMinutes(
-            setHours(date, final.getHours()),
-            final.getMinutes(),
-          );
+          newDate = moment(date)
+            .hours(final.getHours())
+            .minutes(final.getMinutes())
+            .toDate();
         }
         fireChange(initial, newDate);
         setActiveField(null);
@@ -121,7 +121,7 @@ export function PickerProvider({ children, ...props }: PickerProviderProps) {
       const base = field === "initial" ? initial : final;
       if (!base) return;
 
-      const updated = setMinutes(setHours(base, hours), minutes);
+      const updated = moment(base).hours(hours).minutes(minutes).toDate();
       if (field === "initial") {
         fireChange(updated, final);
       } else {
