@@ -1,17 +1,5 @@
 import { useCallback } from 'react';
-import {
-  addDays,
-  subDays,
-  addWeeks,
-  subWeeks,
-  addMonths,
-  subMonths,
-  startOfMonth,
-  endOfMonth,
-  isBefore,
-  isAfter,
-  isSameMonth,
-} from 'date-fns';
+import moment from 'moment';
 import { usePicker } from './context';
 import type { KeyboardEventLike } from './types';
 
@@ -20,8 +8,8 @@ export function useKeyboardNavigation() {
 
   const isWithinBounds = useCallback(
     (date: Date): boolean => {
-      if (picker.min && isBefore(date, picker.min)) return false;
-      if (picker.max && isAfter(date, picker.max)) return false;
+      if (picker.min && moment(date).isBefore(picker.min)) return false;
+      if (picker.max && moment(date).isAfter(picker.max)) return false;
       return true;
     },
     [picker.min, picker.max],
@@ -31,8 +19,8 @@ export function useKeyboardNavigation() {
     (newDate: Date) => {
       if (!isWithinBounds(newDate)) return;
       picker.setFocusedDate(newDate);
-      if (!isSameMonth(newDate, picker.viewDate)) {
-        picker.setViewDate(startOfMonth(newDate));
+      if (!moment(newDate).isSame(picker.viewDate, 'month')) {
+        picker.setViewDate(moment(newDate).startOf('month').toDate());
       }
     },
     [isWithinBounds, picker.setFocusedDate, picker.viewDate, picker.setViewDate],
@@ -47,28 +35,28 @@ export function useKeyboardNavigation() {
 
       switch (e.key) {
         case 'ArrowLeft':
-          newDate = subDays(date, 1);
+          newDate = moment(date).subtract(1, 'days').toDate();
           break;
         case 'ArrowRight':
-          newDate = addDays(date, 1);
+          newDate = moment(date).add(1, 'days').toDate();
           break;
         case 'ArrowUp':
-          newDate = subWeeks(date, 1);
+          newDate = moment(date).subtract(1, 'weeks').toDate();
           break;
         case 'ArrowDown':
-          newDate = addWeeks(date, 1);
+          newDate = moment(date).add(1, 'weeks').toDate();
           break;
         case 'PageUp':
-          newDate = subMonths(date, 1);
+          newDate = moment(date).subtract(1, 'months').toDate();
           break;
         case 'PageDown':
-          newDate = addMonths(date, 1);
+          newDate = moment(date).add(1, 'months').toDate();
           break;
         case 'Home':
-          newDate = startOfMonth(picker.viewDate);
+          newDate = moment(picker.viewDate).startOf('month').toDate();
           break;
         case 'End':
-          newDate = endOfMonth(picker.viewDate);
+          newDate = moment(picker.viewDate).endOf('month').toDate();
           break;
         default:
           return; // Don't preventDefault for unhandled keys
