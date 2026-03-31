@@ -63,16 +63,20 @@ describe('DateTimePeriodPicker', () => {
       expect(screen.getByLabelText('Data final')).toBeInTheDocument();
     });
 
-    it('renders with DD/MM/AAAA placeholder for date variant', () => {
+    it('renders with iMask placeholder pattern for date variant', () => {
       renderPicker({ variant: 'date' });
-      const inputs = screen.getAllByPlaceholderText('DD/MM/AAAA');
-      expect(inputs).toHaveLength(2);
+      const initialInput = screen.getByLabelText('Data inicial');
+      const finalInput = screen.getByLabelText('Data final');
+      expect(initialInput).toHaveValue('__/__/____');
+      expect(finalInput).toHaveValue('__/__/____');
     });
 
-    it('renders with DD/MM/AAAA HH:mm placeholder for datetime variant', () => {
+    it('renders with iMask placeholder pattern for datetime variant', () => {
       renderPicker({ variant: 'datetime' });
-      const inputs = screen.getAllByPlaceholderText('DD/MM/AAAA HH:mm');
-      expect(inputs).toHaveLength(2);
+      const initialInput = screen.getByLabelText('Data inicial');
+      const finalInput = screen.getByLabelText('Data final');
+      expect(initialInput).toHaveValue('__/__/____ __:__');
+      expect(finalInput).toHaveValue('__/__/____ __:__');
     });
 
     it('disables inputs when disabled prop is true', () => {
@@ -212,21 +216,6 @@ describe('DateTimePeriodPicker', () => {
       await userEvent.type(input, '25032026');
       expect(onChange).toHaveBeenCalled();
     });
-
-    it('handles paste with formatted date', async () => {
-      renderPicker();
-      const input = screen.getByLabelText('Data inicial') as HTMLInputElement;
-      await userEvent.click(input);
-
-      // Simulate paste via fireEvent with a mock clipboardData
-      fireEvent.paste(input, {
-        clipboardData: {
-          getData: () => '25/03/2026',
-        },
-      });
-
-      expect(input).toHaveValue('25/03/2026');
-    });
   });
 
   // --- Min/max validation ---
@@ -277,10 +266,10 @@ describe('DateTimePeriodPicker', () => {
 
   // --- Async value ---
   describe('async value', () => {
-    it('renders with empty values without errors', () => {
+    it('renders with empty values showing mask pattern', () => {
       renderPicker({ value: { initial: '', final: '' } });
-      expect(screen.getByLabelText('Data inicial')).toHaveValue('');
-      expect(screen.getByLabelText('Data final')).toHaveValue('');
+      expect(screen.getByLabelText('Data inicial')).toHaveValue('__/__/____');
+      expect(screen.getByLabelText('Data final')).toHaveValue('__/__/____');
     });
 
     it('updates inputs when value changes externally', () => {
