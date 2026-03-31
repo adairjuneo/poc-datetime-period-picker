@@ -1,35 +1,86 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useIMask } from 'react-imask';
+import IMask from 'imask';
+import type { FactoryOpts } from 'imask';
+import moment from 'moment';
 import { usePicker } from './context';
-import { formatDatePtBr, applyMask } from './constants';
+import { formatDatePtBr } from './constants';
 import type { ActiveField } from './types';
 
 type DateInputProps = {
   field: 'initial' | 'final';
-  placeholder?: string;
 };
 
-export function DateInput({ field, placeholder }: DateInputProps) {
+function buildMaskOptions(variant: 'date' | 'datetime') {
+  const blocks: Record<string, unknown> = {
+    d: { mask: IMask.MaskedRange, from: 1, to: 31, maxLength: 2 },
+    m: { mask: IMask.MaskedRange, from: 1, to: 12, maxLength: 2 },
+    Y: { mask: IMask.MaskedRange, from: 1900, to: 2099, maxLength: 4 },
+  };
+
+  if (variant === 'datetime') {
+    blocks.H = { mask: IMask.MaskedRange, from: 0, to: 23, maxLength: 2 };
+    blocks.M = { mask: IMask.MaskedRange, from: 0, to: 59, maxLength: 2 };
+  }
+
+  const pattern = variant === 'datetime' ? '`d/`m/`Y `H:`M' : '`d/`m/`Y';
+  const fmt = variant === 'datetime' ? 'DD/MM/YYYY HH:mm' : 'DD/MM/YYYY';
+
+  return {
+    mask: Date,
+    pattern,
+    lazy: false,
+    placeholderChar: '_',
+    overwrite: true,
+    autofix: false,
+    blocks,
+    format: (date: Date) => moment(date).format(fmt),
+    parse: (str: string) => moment(str, fmt).toDate(),
+  // Cast needed: iMask's FactoryOpts type doesn't cover MaskedDate-specific
+  // options (blocks, format, parse). The runtime config is correct.
+  } as unknown as FactoryOpts;
+}
+
+export function DateInput({ field }: DateInputProps) {
   const picker = usePicker();
-  const inputRef = useRef<HTMLInputElement>(null);
   const dateValue = field === 'initial' ? picker.initial : picker.final;
   const isActive = picker.activeField === field;
 
-  const [localValue, setLocalValue] = useState('');
-  const [isFocused, setIsFocused] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const isExternalUpdate = useRef(false);
+  const unmaskedRef = useRef('');
 
-  const focusedDateId =
-    picker.isOpen && isActive && picker.focusedDate
-      ? `dtp-day-${picker.focusedDate.toISOString()}`
-      : undefined;
+  const maskOptions = useMemo(
+    () => buildMaskOptions(picker.variant),
+    [picker.variant],
+  );
 
-  // Sync localValue whenever the controlled date value changes (e.g. calendar selection).
-  // This runs even while focused — calendar clicks update dateValue externally and the
-  // input must reflect it immediately, not wait for blur.
+  // inputRef gives direct DOM access (for .focus()); maskRef is the callback
+  // ref that useIMask uses to bind its event listeners to the <input>.
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { ref: maskRef, setValue, unmaskedValue } = useIMask(maskOptions, {
+    ref: inputRef,
+    onAccept: (value: string) => {
+      if (isExternalUpdate.current) return;
+      setHasError(false);
+      picker.updateFromInput(field as ActiveField, value);
+    },
+  });
+
+  // Keep ref in sync so handleBlur reads latest value without re-creating
+  unmaskedRef.current = unmaskedValue;
+
+  // Sync iMask value when the controlled date value changes externally
+  // (e.g., calendar selection, parent prop change)
   useEffect(() => {
-    setLocalValue(formatDatePtBr(dateValue, picker.variant));
+    isExternalUpdate.current = true;
+    setValue(formatDatePtBr(dateValue, picker.variant));
     setHasError(false);
-  }, [dateValue, picker.variant]);
+    // Use queueMicrotask to reset the guard after iMask processes the setValue
+    queueMicrotask(() => {
+      isExternalUpdate.current = false;
+    });
+  }, [dateValue, picker.variant, setValue]);
 
   // Auto-focus when activeField changes to this field
   useEffect(() => {
@@ -39,40 +90,16 @@ export function DateInput({ field, placeholder }: DateInputProps) {
   }, [isActive]);
 
   const handleFocus = useCallback(() => {
-    setIsFocused(true);
     picker.setActiveField(field);
     picker.open();
   }, [field, picker]);
 
   const handleBlur = useCallback(() => {
-    setIsFocused(false);
-    // Validate on blur: if incomplete or invalid, show error
-    const expectedLen = picker.variant === 'datetime' ? 16 : 10;
-    if (localValue.length > 0 && localValue.length < expectedLen) {
+    const expectedDigits = picker.variant === 'datetime' ? 12 : 8;
+    if (unmaskedRef.current.length > 0 && unmaskedRef.current.length < expectedDigits) {
       setHasError(true);
     }
-  }, [localValue, picker.variant]);
-
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const masked = applyMask(e.target.value, picker.variant);
-      setLocalValue(masked);
-      setHasError(false);
-      picker.updateFromInput(field as ActiveField, masked);
-    },
-    [field, picker],
-  );
-
-  const handlePaste = useCallback(
-    (e: React.ClipboardEvent) => {
-      e.preventDefault();
-      const pasted = e.clipboardData.getData('text');
-      const masked = applyMask(pasted, picker.variant);
-      setLocalValue(masked);
-      picker.updateFromInput(field as ActiveField, masked);
-    },
-    [field, picker],
-  );
+  }, [picker.variant]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -81,25 +108,21 @@ export function DateInput({ field, placeholder }: DateInputProps) {
     [picker, field],
   );
 
-  const displayValue = isFocused ? localValue : formatDatePtBr(dateValue, picker.variant);
-  const defaultPlaceholder = picker.variant === 'datetime' ? 'DD/MM/AAAA HH:mm' : 'DD/MM/AAAA';
-  const maxLength = picker.variant === 'datetime' ? 16 : 10;
+  const focusedDateId =
+    picker.isOpen && isActive && picker.focusedDate
+      ? `dtp-day-${picker.focusedDate.toISOString()}`
+      : undefined;
 
   return (
     <input
-      ref={inputRef}
+      ref={maskRef}
       type="text"
       className="input"
       data-state-active={isActive || undefined}
       data-state-error={hasError || undefined}
-      value={displayValue}
-      placeholder={placeholder ?? defaultPlaceholder}
-      maxLength={maxLength}
       disabled={picker.disabled}
       onFocus={handleFocus}
       onBlur={handleBlur}
-      onChange={handleChange}
-      onPaste={handlePaste}
       onKeyDown={handleKeyDown}
       role="combobox"
       aria-haspopup="dialog"

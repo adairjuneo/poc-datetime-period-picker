@@ -21,7 +21,6 @@ export type DateTimePeriodPickerProps = {
   min?: string;
   max?: string;
   disabled?: boolean;
-  placeholder?: string;
   name?: string;
 };
 

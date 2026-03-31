@@ -10,7 +10,7 @@ import './styles.scss';
 
 export type { DatePeriod, DatePeriodChangeEvent, DateTimePeriodPickerProps } from './types';
 
-function PickerShell({ variant, placeholder }: { variant: 'date' | 'datetime'; placeholder?: string }) {
+function PickerShell({ variant }: { variant: 'date' | 'datetime' }) {
   const picker = usePicker();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const anchorRef = useRef<HTMLDivElement>(null);
@@ -46,9 +46,9 @@ function PickerShell({ variant, placeholder }: { variant: 'date' | 'datetime'; p
   return (
     <div ref={wrapperRef} className="datetime-period-picker" onBlur={handleBlur} onKeyDown={handleKeyDown}>
       <div ref={anchorRef} className="input-group">
-        <DateInput field="initial" placeholder={placeholder} />
+        <DateInput field="initial" />
         <span className="separator">—</span>
-        <DateInput field="final" placeholder={placeholder} />
+        <DateInput field="final" />
       </div>
 
       <Dropdown anchorRef={anchorRef}>
@@ -64,7 +64,7 @@ export function DateTimePeriodPicker(props: DateTimePeriodPickerProps) {
 
   return (
     <PickerProvider {...props}>
-      <PickerShell variant={variant} placeholder={props.placeholder} />
+      <PickerShell variant={variant} />
     </PickerProvider>
   );
 }
