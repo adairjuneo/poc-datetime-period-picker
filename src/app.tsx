@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import 'moment/locale/pt-br';
 import { DateTimePeriodPicker } from './components/datetime-period-picker';
 import type { DatePeriod } from './components/datetime-period-picker';
 
