@@ -167,12 +167,13 @@ export function PickerProvider({ children, ...props }: PickerProviderProps) {
     setFocusedDate(null);
   }, []);
 
-  // Sync focusedDate when activeField changes (e.g. user tabs between inputs)
+  // Sync focusedDate and viewDate when activeField changes (e.g. user tabs between inputs)
   // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally excluding initial/final; only sync on activeField change
   useEffect(() => {
     if (!isOpen || !activeField) return;
     const date = activeField === 'initial' ? initial : final;
     setFocusedDate(date ?? new Date());
+    setViewDate(date ?? new Date());
   }, [isOpen, activeField]);
 
   const value = useMemo<PickerContextValue>(
