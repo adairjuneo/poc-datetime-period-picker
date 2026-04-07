@@ -48,6 +48,7 @@ export function DateInput({ field }: DateInputProps) {
 
   const isExternalUpdate = useRef(false);
   const unmaskedRef = useRef('');
+  const dateOnFocusRef = useRef<Date | null>(null);
 
   const maskOptions = useMemo(
     () => buildMaskOptions(picker.variant),
@@ -93,13 +94,30 @@ export function DateInput({ field }: DateInputProps) {
   }, [isActive]);
 
   const handleFocus = useCallback(() => {
+    dateOnFocusRef.current = dateValue;
     picker.setActiveField(field);
     picker.open();
-  }, [field, picker]);
+  }, [field, picker, dateValue]);
 
   const handleBlur = useCallback(() => {
-    // Rollback behavior will be added in a follow-up task
-  }, []);
+    const expectedDigits = picker.variant === 'datetime' ? 12 : 8;
+    const len = unmaskedRef.current.length;
+
+    if (len > 0 && len < expectedDigits) {
+      const savedDate = dateOnFocusRef.current;
+      if (savedDate) {
+        // Restore the previous date — let onAccept propagate to parent
+        setValue(formatDatePtBr(savedDate, picker.variant));
+      } else {
+        // No previous date: clear to placeholder, guard to avoid extra onChange
+        isExternalUpdate.current = true;
+        setValue('');
+        queueMicrotask(() => {
+          isExternalUpdate.current = false;
+        });
+      }
+    }
+  }, [picker.variant, setValue]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {

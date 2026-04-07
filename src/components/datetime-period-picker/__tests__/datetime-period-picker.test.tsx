@@ -475,4 +475,92 @@ describe('DateTimePeriodPicker', () => {
       expect(lastCall.target.value.initial).toBe('');
     });
   });
+
+  // --- Blur rollback ---
+  describe('blur rollback', () => {
+    /**
+     * Helper: select-all + delete to clear a masked input.
+     * userEvent.clear() may not reliably trigger iMask's onAccept,
+     * so we use tripleClick (select all) + Backspace instead.
+     */
+    async function clearInput(input: HTMLElement) {
+      await userEvent.tripleClick(input);
+      await userEvent.keyboard('{Backspace}');
+    }
+
+    it('restores previous date when blur with partial input', async () => {
+      renderControlled({
+        value: { initial: '2026-03-25', final: '' },
+      });
+
+      const input = screen.getByLabelText('Data inicial');
+      await userEvent.click(input);
+
+      // Input should show the formatted date
+      expect(input).toHaveValue('25/03/2026');
+
+      // Partially clear: select all, then type only a partial date
+      await clearInput(input);
+      await userEvent.type(input, '01');
+
+      // Now input has partial content (e.g., "01/__/____")
+      // Blur the input by clicking outside
+      await userEvent.click(document.body);
+
+      // After blur, input should be restored to the original date
+      expect(input).toHaveValue('25/03/2026');
+    });
+
+    it('clears to placeholder when blur with partial input and no previous date', async () => {
+      renderControlled({
+        value: { initial: '', final: '' },
+      });
+
+      const input = screen.getByLabelText('Data inicial');
+      await userEvent.click(input);
+
+      // Type a partial date (not complete)
+      await userEvent.type(input, '15');
+
+      // Blur the input
+      await userEvent.click(document.body);
+
+      // After blur, input should show the empty placeholder
+      expect(input).toHaveValue('__/__/____');
+    });
+
+    it('does nothing on blur when input has complete date', async () => {
+      renderControlled({
+        value: { initial: '', final: '' },
+      });
+
+      const input = screen.getByLabelText('Data inicial');
+      await userEvent.click(input);
+
+      // Type a complete date
+      await userEvent.type(input, '25032026');
+      expect(input).toHaveValue('25/03/2026');
+
+      // Blur the input
+      await userEvent.click(document.body);
+
+      // Input should still show the typed date
+      expect(input).toHaveValue('25/03/2026');
+    });
+
+    it('does nothing on blur when input is empty', async () => {
+      renderControlled({
+        value: { initial: '', final: '' },
+      });
+
+      const input = screen.getByLabelText('Data inicial');
+      await userEvent.click(input);
+
+      // Don't type anything, just blur
+      await userEvent.click(document.body);
+
+      // Input should still show the empty placeholder
+      expect(input).toHaveValue('__/__/____');
+    });
+  });
 });
