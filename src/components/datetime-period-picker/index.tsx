@@ -10,7 +10,15 @@ import './styles.scss';
 
 export type { DatePeriod, DatePeriodChangeEvent, DateTimePeriodPickerProps } from './types';
 
-function PickerShell({ variant }: { variant: 'date' | 'datetime' }) {
+type PickerShellProps = {
+  variant: 'date' | 'datetime';
+  label?: string;
+  labelUppercase?: boolean;
+  initialRef?: React.RefObject<HTMLInputElement | null>;
+  finalRef?: React.RefObject<HTMLInputElement | null>;
+};
+
+function PickerShell({ variant, label, labelUppercase, initialRef, finalRef }: PickerShellProps) {
   const picker = usePicker();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const anchorRef = useRef<HTMLDivElement>(null);
@@ -45,10 +53,18 @@ function PickerShell({ variant }: { variant: 'date' | 'datetime' }) {
 
   return (
     <div ref={wrapperRef} className="datetime-period-picker" onBlur={handleBlur} onKeyDown={handleKeyDown}>
+      {label && (
+        <label
+          className="label"
+          data-state-label-uppercase={labelUppercase || undefined}
+        >
+          {label}
+        </label>
+      )}
       <div ref={anchorRef} className="input-group">
-        <DateInput field="initial" />
+        <DateInput field="initial" externalRef={initialRef} />
         <span className="separator">—</span>
-        <DateInput field="final" />
+        <DateInput field="final" externalRef={finalRef} />
       </div>
 
       <Dropdown anchorRef={anchorRef}>
@@ -59,12 +75,21 @@ function PickerShell({ variant }: { variant: 'date' | 'datetime' }) {
   );
 }
 
-export function DateTimePeriodPicker(props: DateTimePeriodPickerProps) {
+export function DateTimePeriodPicker<
+  I extends string = 'initial',
+  F extends string = 'final'
+>(props: DateTimePeriodPickerProps<I, F>) {
   const variant = props.variant ?? 'date';
 
   return (
-    <PickerProvider {...props}>
-      <PickerShell variant={variant} />
+    <PickerProvider {...(props as unknown as DateTimePeriodPickerProps)}>
+      <PickerShell
+        variant={variant}
+        label={props.label}
+        labelUppercase={props.labelUppercase}
+        initialRef={props.initialRef}
+        finalRef={props.finalRef}
+      />
     </PickerProvider>
   );
 }

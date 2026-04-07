@@ -11,6 +11,7 @@ import moment from "moment";
 import { formatToIso, parseDatePtBr, sortPeriod } from "./constants";
 import type {
   DateTimePeriodPickerProps,
+  DatePeriodChangeEvent,
   PickerContextValue,
   ActiveField,
   Variant,
@@ -30,15 +31,22 @@ type PickerProviderProps = DateTimePeriodPickerProps & { children: ReactNode };
 export function PickerProvider({ children, ...props }: PickerProviderProps) {
   const variant: Variant = props.variant ?? "date";
   const disabled = props.disabled ?? false;
+  const readOnly = props.readOnly ?? false;
+  const undigitable = props.undigitable ?? false;
+  const iName = props.initialName ?? 'initial';
+  const fName = props.finalName ?? 'final';
+  const componentName = props.name ?? '';
 
   // Parse props.value ISO strings to Date | null (memoized to preserve referential equality)
+  const initialIso = (props.value as Record<string, string>)[iName] ?? '';
+  const finalIso = (props.value as Record<string, string>)[fName] ?? '';
   const initial = useMemo(
-    () => (props.value.initial ? moment(props.value.initial).toDate() : null),
-    [props.value.initial],
+    () => (initialIso ? moment(initialIso).toDate() : null),
+    [initialIso],
   );
   const final = useMemo(
-    () => (props.value.final ? moment(props.value.final).toDate() : null),
-    [props.value.final],
+    () => (finalIso ? moment(finalIso).toDate() : null),
+    [finalIso],
   );
   const min = useMemo(() => (props.min ? moment(props.min).toDate() : null), [props.min]);
   const max = useMemo(() => (props.max ? moment(props.max).toDate() : null), [props.max]);
@@ -63,15 +71,15 @@ export function PickerProvider({ children, ...props }: PickerProviderProps) {
       }
       props.onChange({
         target: {
-          name: props.name ?? "",
+          name: componentName,
           value: {
-            initial: i ? formatToIso(i, variant) : "",
-            final: f ? formatToIso(f, variant) : "",
+            [iName]: i ? formatToIso(i, variant) : '',
+            [fName]: f ? formatToIso(f, variant) : '',
           },
         },
-      });
+      } as DatePeriodChangeEvent); // Cast needed: computed property keys lose generic inference
     },
-    [props.onChange, props.name, variant],
+    [props.onChange, componentName, variant, iName, fName],
   );
 
   const navigateMonth = useCallback((direction: 1 | -1) => {
@@ -167,14 +175,13 @@ export function PickerProvider({ children, ...props }: PickerProviderProps) {
   );
 
   const open = useCallback(() => {
-    if (!disabled) {
+    if (!disabled && !readOnly) {
       setIsOpen(true);
       if (initial) setViewDate(initial);
-      // Initialize focusedDate based on initial value or today
       const fieldDate = initial ?? new Date();
       setFocusedDate(fieldDate);
     }
-  }, [disabled, initial]);
+  }, [disabled, readOnly, initial]);
 
   const close = useCallback(() => {
     setIsOpen(false);
@@ -198,6 +205,11 @@ export function PickerProvider({ children, ...props }: PickerProviderProps) {
       min,
       max,
       disabled,
+      readOnly,
+      undigitable,
+      componentName,
+      initialName: iName,
+      finalName: fName,
       initial,
       final,
       viewDate,
@@ -225,6 +237,11 @@ export function PickerProvider({ children, ...props }: PickerProviderProps) {
       min,
       max,
       disabled,
+      readOnly,
+      undigitable,
+      componentName,
+      iName,
+      fName,
       initial,
       final,
       viewDate,

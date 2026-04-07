@@ -1,27 +1,41 @@
 export type Variant = "date" | "datetime";
 
-export type DatePeriod = {
-  initial: string;
-  final: string;
-};
+export type DatePeriod<
+  I extends string = 'initial',
+  F extends string = 'final'
+> = Record<I, string> & Record<F, string>;
 
-export type DatePeriodChangeEvent = {
+export type DatePeriodChangeEvent<
+  I extends string = 'initial',
+  F extends string = 'final'
+> = {
   target: {
     name: string;
-    value: DatePeriod;
+    value: DatePeriod<I, F>;
   };
 };
 
 export type ActiveField = "initial" | "final" | null;
 
-export type DateTimePeriodPickerProps = {
+export type DateTimePeriodPickerProps<
+  I extends string = 'initial',
+  F extends string = 'final'
+> = {
   variant?: Variant;
-  value: DatePeriod;
-  onChange: (event: DatePeriodChangeEvent) => void;
+  value: DatePeriod<I, F>;
+  onChange: (event: DatePeriodChangeEvent<I, F>) => void;
   min?: string;
   max?: string;
   disabled?: boolean;
+  readOnly?: boolean;
+  undigitable?: boolean;
   name?: string;
+  label?: string;
+  labelUppercase?: boolean;
+  initialName?: I;
+  finalName?: F;
+  initialRef?: React.RefObject<HTMLInputElement | null>;
+  finalRef?: React.RefObject<HTMLInputElement | null>;
 };
 
 export type CalendarCell = {
@@ -42,6 +56,11 @@ export type PickerContextValue = {
   min: Date | null;
   max: Date | null;
   disabled: boolean;
+  readOnly: boolean;
+  undigitable: boolean;
+  componentName: string;
+  initialName: string;
+  finalName: string;
   initial: Date | null;
   final: Date | null;
   viewDate: Date;

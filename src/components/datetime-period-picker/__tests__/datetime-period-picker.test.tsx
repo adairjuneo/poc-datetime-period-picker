@@ -553,4 +553,90 @@ describe('DateTimePeriodPicker', () => {
       expect(input).toHaveValue('__/__/____');
     });
   });
+
+  // --- initialName / finalName ---
+  describe('initialName / finalName', () => {
+    it('input name attributes use custom names', async () => {
+      render(
+        <DateTimePeriodPicker
+          name="periodo"
+          initialName="inicio"
+          finalName="fim"
+          value={{ inicio: '', fim: '' }}
+          onChange={() => {}}
+        />,
+      );
+
+      const initialInput = screen.getByLabelText('Data inicial');
+      const finalInput = screen.getByLabelText('Data final');
+      expect(initialInput).toHaveAttribute('name', 'periodo.inicio');
+      expect(finalInput).toHaveAttribute('name', 'periodo.fim');
+    });
+
+    it('default names work without props', () => {
+      render(
+        <DateTimePeriodPicker
+          name="period"
+          value={{ initial: '', final: '' }}
+          onChange={() => {}}
+        />,
+      );
+
+      const initialInput = screen.getByLabelText('Data inicial');
+      const finalInput = screen.getByLabelText('Data final');
+      expect(initialInput).toHaveAttribute('name', 'period.initial');
+      expect(finalInput).toHaveAttribute('name', 'period.final');
+    });
+
+    it('onChange emits value with custom keys', async () => {
+      const spy = vi.fn();
+
+      function Controlled() {
+        const [value, setValue] = useState({ inicio: '', fim: '' });
+        return (
+          <DateTimePeriodPicker
+            name="periodo"
+            initialName="inicio"
+            finalName="fim"
+            value={value}
+            onChange={(e) => {
+              setValue(e.target.value);
+              spy(e);
+            }}
+          />
+        );
+      }
+
+      render(<Controlled />);
+      await userEvent.click(screen.getByLabelText('Data inicial'));
+
+      const day15Buttons = screen.getAllByText('15');
+      const day15 = day15Buttons.find(
+        (btn) => !btn.hasAttribute('data-state-outside'),
+      ) ?? day15Buttons[0];
+      await userEvent.click(day15);
+
+      expect(spy).toHaveBeenCalled();
+      const event = spy.mock.calls[0][0];
+      expect(event.target.value).toHaveProperty('inicio');
+      expect(event.target.value).toHaveProperty('fim');
+      expect(event.target.value).not.toHaveProperty('initial');
+      expect(event.target.value).not.toHaveProperty('final');
+    });
+
+    it('value is read with custom keys', () => {
+      render(
+        <DateTimePeriodPicker
+          name="periodo"
+          initialName="inicio"
+          finalName="fim"
+          value={{ inicio: '2026-03-25', fim: '' }}
+          onChange={() => {}}
+        />,
+      );
+
+      const initialInput = screen.getByLabelText('Data inicial');
+      expect(initialInput).toHaveValue('25/03/2026');
+    });
+  });
 });

@@ -9,7 +9,20 @@ import type { ActiveField } from './types';
 
 type DateInputProps = {
   field: 'initial' | 'final';
+  externalRef?: React.RefObject<HTMLInputElement | null>;
 };
+
+function mergeRefs<T>(...refs: (React.Ref<T> | undefined)[]) {
+  return (instance: T | null) => {
+    for (const ref of refs) {
+      if (typeof ref === 'function') {
+        ref(instance);
+      } else if (ref && typeof ref === 'object') {
+        (ref as React.RefObject<T | null>).current = instance;
+      }
+    }
+  };
+}
 
 function buildMaskOptions(variant: 'date' | 'datetime') {
   const blocks: Record<string, unknown> = {
@@ -41,7 +54,7 @@ function buildMaskOptions(variant: 'date' | 'datetime') {
   } as unknown as FactoryOpts;
 }
 
-export function DateInput({ field }: DateInputProps) {
+export function DateInput({ field, externalRef }: DateInputProps) {
   const picker = usePicker();
   const dateValue = field === 'initial' ? picker.initial : picker.final;
   const isActive = picker.activeField === field;
@@ -51,6 +64,9 @@ export function DateInput({ field }: DateInputProps) {
   const dateOnFocusRef = useRef<Date | null>(null);
   const dateValueRef = useRef(dateValue);
   dateValueRef.current = dateValue;
+
+  const fieldInputName = field === 'initial' ? picker.initialName : picker.finalName;
+  const inputName = picker.componentName ? `${picker.componentName}.${fieldInputName}` : fieldInputName;
 
   const maskOptions = useMemo(
     () => buildMaskOptions(picker.variant),
@@ -135,9 +151,10 @@ export function DateInput({ field }: DateInputProps) {
 
   return (
     <input
-      ref={maskRef}
+      ref={mergeRefs(maskRef, externalRef)}
       type="text"
       className="input"
+      name={inputName}
       data-state-active={isActive || undefined}
       disabled={picker.disabled}
       onFocus={handleFocus}
