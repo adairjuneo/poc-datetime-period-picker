@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -785,6 +785,76 @@ describe('DateTimePeriodPicker', () => {
 
       expect(spy).toHaveBeenCalled();
       expect(spy.mock.calls[0][0].target.value.initial).not.toBe('');
+    });
+  });
+
+  // --- initialRef / finalRef ---
+  describe('initialRef / finalRef', () => {
+    it('initialRef receives the initial input element', () => {
+      const ref = { current: null } as React.RefObject<HTMLInputElement | null>;
+
+      render(
+        <DateTimePeriodPicker
+          name="period"
+          value={{ initial: '', final: '' }}
+          onChange={() => {}}
+          initialRef={ref}
+        />,
+      );
+
+      const input = screen.getByLabelText('Data inicial');
+      expect(ref.current).toBe(input);
+    });
+
+    it('finalRef receives the final input element', () => {
+      const ref = { current: null } as React.RefObject<HTMLInputElement | null>;
+
+      render(
+        <DateTimePeriodPicker
+          name="period"
+          value={{ initial: '', final: '' }}
+          onChange={() => {}}
+          finalRef={ref}
+        />,
+      );
+
+      const input = screen.getByLabelText('Data final');
+      expect(ref.current).toBe(input);
+    });
+  });
+
+  // --- Combination ---
+  describe('combination', () => {
+    it('readOnly + label + custom names all work together', () => {
+      render(
+        <DateTimePeriodPicker
+          name="periodo"
+          initialName="inicio"
+          finalName="fim"
+          value={{ inicio: '2026-03-25', fim: '2026-03-28' }}
+          onChange={() => {}}
+          readOnly
+          label="Período de viagem"
+          labelUppercase
+        />,
+      );
+
+      // Label is rendered with uppercase attribute
+      const label = screen.getByText('Período de viagem');
+      expect(label).toBeInTheDocument();
+      expect(label).toHaveAttribute('data-state-label-uppercase', 'true');
+
+      // Inputs are readOnly with custom names
+      const initialInput = screen.getByLabelText('Data inicial');
+      const finalInput = screen.getByLabelText('Data final');
+      expect(initialInput).toHaveAttribute('readonly');
+      expect(finalInput).toHaveAttribute('readonly');
+      expect(initialInput).toHaveAttribute('name', 'periodo.inicio');
+      expect(finalInput).toHaveAttribute('name', 'periodo.fim');
+
+      // Values are displayed correctly
+      expect(initialInput).toHaveValue('25/03/2026');
+      expect(finalInput).toHaveValue('28/03/2026');
     });
   });
 });
