@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { useIMask } from 'react-imask';
 import IMask from 'imask';
 import type { FactoryOpts } from 'imask';
@@ -46,7 +46,6 @@ export function DateInput({ field }: DateInputProps) {
   const dateValue = field === 'initial' ? picker.initial : picker.final;
   const isActive = picker.activeField === field;
 
-  const [hasError, setHasError] = useState(false);
   const isExternalUpdate = useRef(false);
   const unmaskedRef = useRef('');
 
@@ -62,7 +61,6 @@ export function DateInput({ field }: DateInputProps) {
     ref: inputRef,
     onAccept: (value: string, mask) => {
       if (isExternalUpdate.current) return;
-      setHasError(false);
 
       if (mask.unmaskedValue === '') {
         picker.clearField(field as ActiveField);
@@ -81,7 +79,6 @@ export function DateInput({ field }: DateInputProps) {
   useEffect(() => {
     isExternalUpdate.current = true;
     setValue(formatDatePtBr(dateValue, picker.variant));
-    setHasError(false);
     // Use queueMicrotask to reset the guard after iMask processes the setValue
     queueMicrotask(() => {
       isExternalUpdate.current = false;
@@ -101,11 +98,8 @@ export function DateInput({ field }: DateInputProps) {
   }, [field, picker]);
 
   const handleBlur = useCallback(() => {
-    const expectedDigits = picker.variant === 'datetime' ? 12 : 8;
-    if (unmaskedRef.current.length > 0 && unmaskedRef.current.length < expectedDigits) {
-      setHasError(true);
-    }
-  }, [picker.variant]);
+    // Rollback behavior will be added in a follow-up task
+  }, []);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -125,7 +119,6 @@ export function DateInput({ field }: DateInputProps) {
       type="text"
       className="input"
       data-state-active={isActive || undefined}
-      data-state-error={hasError || undefined}
       disabled={picker.disabled}
       onFocus={handleFocus}
       onBlur={handleBlur}
