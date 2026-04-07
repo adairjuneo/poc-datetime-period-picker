@@ -55,6 +55,16 @@ function renderControlled(overrides: Partial<DateTimePeriodPickerProps> = {}) {
 }
 
 describe('DateTimePeriodPicker', () => {
+  /**
+   * Helper: select-all + delete to clear a masked input.
+   * userEvent.clear() may not reliably trigger iMask's onAccept,
+   * so we use tripleClick (select all) + Backspace instead.
+   */
+  async function clearInput(input: HTMLElement) {
+    await userEvent.tripleClick(input);
+    await userEvent.keyboard('{Backspace}');
+  }
+
   // --- Basic rendering ---
   describe('rendering', () => {
     it('renders two inputs', () => {
@@ -360,16 +370,6 @@ describe('DateTimePeriodPicker', () => {
 
   // --- Clear on empty ---
   describe('clear on empty', () => {
-    /**
-     * Helper: select-all + delete to clear a masked input.
-     * userEvent.clear() may not reliably trigger iMask's onAccept,
-     * so we use tripleClick (select all) + Backspace instead.
-     */
-    async function clearInput(input: HTMLElement) {
-      await userEvent.tripleClick(input);
-      await userEvent.keyboard('{Backspace}');
-    }
-
     it('emits onChange with empty initial when input is fully cleared', async () => {
       const { onChange } = renderControlled({
         value: { initial: '2026-03-25', final: '2026-03-28' },
@@ -478,16 +478,6 @@ describe('DateTimePeriodPicker', () => {
 
   // --- Blur rollback ---
   describe('blur rollback', () => {
-    /**
-     * Helper: select-all + delete to clear a masked input.
-     * userEvent.clear() may not reliably trigger iMask's onAccept,
-     * so we use tripleClick (select all) + Backspace instead.
-     */
-    async function clearInput(input: HTMLElement) {
-      await userEvent.tripleClick(input);
-      await userEvent.keyboard('{Backspace}');
-    }
-
     it('restores previous date when blur with partial input', async () => {
       renderControlled({
         value: { initial: '2026-03-25', final: '' },

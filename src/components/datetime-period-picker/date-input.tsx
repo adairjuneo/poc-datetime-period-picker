@@ -49,6 +49,8 @@ export function DateInput({ field }: DateInputProps) {
   const isExternalUpdate = useRef(false);
   const unmaskedRef = useRef('');
   const dateOnFocusRef = useRef<Date | null>(null);
+  const dateValueRef = useRef(dateValue);
+  dateValueRef.current = dateValue;
 
   const maskOptions = useMemo(
     () => buildMaskOptions(picker.variant),
@@ -94,10 +96,10 @@ export function DateInput({ field }: DateInputProps) {
   }, [isActive]);
 
   const handleFocus = useCallback(() => {
-    dateOnFocusRef.current = dateValue;
+    dateOnFocusRef.current = dateValueRef.current;
     picker.setActiveField(field);
     picker.open();
-  }, [field, picker, dateValue]);
+  }, [field, picker]);
 
   const handleBlur = useCallback(() => {
     const expectedDigits = picker.variant === 'datetime' ? 12 : 8;
