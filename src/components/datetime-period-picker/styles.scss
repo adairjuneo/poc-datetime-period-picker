@@ -53,6 +53,10 @@
       opacity: 0.5;
       cursor: not-allowed;
     }
+
+    &[data-state-read-only='true'] {
+      cursor: default;
+    }
   }
 
   // --- Dropdown ---

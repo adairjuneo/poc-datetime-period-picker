@@ -684,4 +684,49 @@ describe('DateTimePeriodPicker', () => {
       expect(label).toHaveAttribute('data-state-label-uppercase', 'true');
     });
   });
+
+  // --- readOnly ---
+  describe('readOnly', () => {
+    it('inputs have readOnly attribute', () => {
+      render(
+        <DateTimePeriodPicker
+          name="period"
+          value={{ initial: '', final: '' }}
+          onChange={() => {}}
+          readOnly
+        />,
+      );
+
+      expect(screen.getByLabelText('Data inicial')).toHaveAttribute('readonly');
+      expect(screen.getByLabelText('Data final')).toHaveAttribute('readonly');
+    });
+
+    it('prevents dropdown from opening', async () => {
+      render(
+        <DateTimePeriodPicker
+          name="period"
+          value={{ initial: '2026-03-25', final: '' }}
+          onChange={() => {}}
+          readOnly
+        />,
+      );
+
+      await userEvent.click(screen.getByLabelText('Data inicial'));
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('displays existing value', () => {
+      render(
+        <DateTimePeriodPicker
+          name="period"
+          value={{ initial: '2026-03-25', final: '2026-03-28' }}
+          onChange={() => {}}
+          readOnly
+        />,
+      );
+
+      expect(screen.getByLabelText('Data inicial')).toHaveValue('25/03/2026');
+      expect(screen.getByLabelText('Data final')).toHaveValue('28/03/2026');
+    });
+  });
 });

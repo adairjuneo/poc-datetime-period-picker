@@ -156,7 +156,9 @@ export function DateInput({ field, externalRef }: DateInputProps) {
       className="input"
       name={inputName}
       data-state-active={isActive || undefined}
+      data-state-read-only={picker.readOnly || undefined}
       disabled={picker.disabled}
+      readOnly={picker.readOnly}
       onFocus={handleFocus}
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
