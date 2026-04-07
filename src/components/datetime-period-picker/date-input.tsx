@@ -111,6 +111,18 @@ export function DateInput({ field, externalRef }: DateInputProps) {
     }
   }, [isActive]);
 
+  const handleBeforeInput = useCallback((e: React.FormEvent<HTMLInputElement>) => {
+    if (picker.undigitable) {
+      e.preventDefault();
+    }
+  }, [picker.undigitable]);
+
+  const handlePaste = useCallback((e: React.ClipboardEvent<HTMLInputElement>) => {
+    if (picker.undigitable) {
+      e.preventDefault();
+    }
+  }, [picker.undigitable]);
+
   const handleFocus = useCallback(() => {
     dateOnFocusRef.current = dateValueRef.current;
     picker.setActiveField(field);
@@ -157,8 +169,11 @@ export function DateInput({ field, externalRef }: DateInputProps) {
       name={inputName}
       data-state-active={isActive || undefined}
       data-state-read-only={picker.readOnly || undefined}
+      data-state-undigitable={picker.undigitable || undefined}
       disabled={picker.disabled}
-      readOnly={picker.readOnly}
+      readOnly={picker.readOnly || picker.undigitable}
+      onBeforeInput={handleBeforeInput}
+      onPaste={handlePaste}
       onFocus={handleFocus}
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}

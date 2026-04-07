@@ -729,4 +729,62 @@ describe('DateTimePeriodPicker', () => {
       expect(screen.getByLabelText('Data final')).toHaveValue('28/03/2026');
     });
   });
+
+  // --- undigitable ---
+  describe('undigitable', () => {
+    it('blocks typing in inputs', async () => {
+      const onChange = vi.fn();
+      render(
+        <DateTimePeriodPicker
+          name="period"
+          value={{ initial: '', final: '' }}
+          onChange={onChange}
+          undigitable
+        />,
+      );
+
+      const input = screen.getByLabelText('Data inicial');
+      await userEvent.click(input);
+      await userEvent.type(input, '25032026');
+
+      // onChange should not be called — typing is blocked
+      expect(onChange).not.toHaveBeenCalled();
+      // Input should still show placeholder
+      expect(input).toHaveValue('__/__/____');
+    });
+
+    it('allows calendar selection', async () => {
+      const spy = vi.fn();
+
+      function Controlled() {
+        const [value, setValue] = useState({ initial: '', final: '' });
+        return (
+          <DateTimePeriodPicker
+            name="period"
+            value={value}
+            onChange={(e) => {
+              setValue(e.target.value);
+              spy(e);
+            }}
+            undigitable
+          />
+        );
+      }
+
+      render(<Controlled />);
+      await userEvent.click(screen.getByLabelText('Data inicial'));
+
+      // Calendar should be open
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+      const day15Buttons = screen.getAllByText('15');
+      const day15 = day15Buttons.find(
+        (btn) => !btn.hasAttribute('data-state-outside'),
+      ) ?? day15Buttons[0];
+      await userEvent.click(day15);
+
+      expect(spy).toHaveBeenCalled();
+      expect(spy.mock.calls[0][0].target.value.initial).not.toBe('');
+    });
+  });
 });

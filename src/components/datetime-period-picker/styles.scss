@@ -57,6 +57,10 @@
     &[data-state-read-only='true'] {
       cursor: default;
     }
+
+    &[data-state-undigitable='true'] {
+      cursor: pointer;
+    }
   }
 
   // --- Dropdown ---
