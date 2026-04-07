@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import 'moment/locale/pt-br';
+import moment from 'moment';
 import { DateTimePeriodPicker } from './components/datetime-period-picker';
 import type { DatePeriod } from './components/datetime-period-picker';
 
@@ -13,6 +13,8 @@ export function App() {
     initial: '',
     final: '',
   });
+
+  moment.locale('pt-BR');
 
   return (
     <main>
