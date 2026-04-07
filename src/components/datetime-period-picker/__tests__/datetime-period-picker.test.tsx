@@ -639,4 +639,49 @@ describe('DateTimePeriodPicker', () => {
       expect(initialInput).toHaveValue('25/03/2026');
     });
   });
+
+  // --- Label ---
+  describe('label', () => {
+    it('renders label when prop is provided', () => {
+      render(
+        <DateTimePeriodPicker
+          name="period"
+          value={{ initial: '', final: '' }}
+          onChange={() => {}}
+          label="Período"
+        />,
+      );
+
+      const label = screen.getByText('Período');
+      expect(label).toBeInTheDocument();
+      expect(label.tagName).toBe('LABEL');
+    });
+
+    it('does not render label when prop is omitted', () => {
+      render(
+        <DateTimePeriodPicker
+          name="period"
+          value={{ initial: '', final: '' }}
+          onChange={() => {}}
+        />,
+      );
+
+      expect(screen.queryByText('Período')).not.toBeInTheDocument();
+    });
+
+    it('applies uppercase data attribute when labelUppercase is true', () => {
+      render(
+        <DateTimePeriodPicker
+          name="period"
+          value={{ initial: '', final: '' }}
+          onChange={() => {}}
+          label="Período"
+          labelUppercase
+        />,
+      );
+
+      const label = screen.getByText('Período');
+      expect(label).toHaveAttribute('data-state-label-uppercase', 'true');
+    });
+  });
 });

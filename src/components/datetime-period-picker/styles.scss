@@ -20,6 +20,17 @@
     user-select: none;
   }
 
+  .label {
+    font-size: 14px;
+    font-weight: 500;
+    color: $text-heading;
+    margin-bottom: 4px;
+
+    &[data-state-label-uppercase='true'] {
+      text-transform: uppercase;
+    }
+  }
+
   .input {
     padding: 8px 12px;
     border: 1px solid $border;
