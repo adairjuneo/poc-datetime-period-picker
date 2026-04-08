@@ -1,10 +1,11 @@
+// src/components/date/period-picker/index.tsx
 import { useRef, useCallback, useEffect } from 'react';
 import { PickerProvider, usePicker } from './context';
 import { DateInput } from './date-input';
-import { Dropdown } from './dropdown';
+import { Dropdown } from '../shared/dropdown';
 import { Calendar } from './calendar';
 import { TimeSelector } from './time-selector';
-import { useKeyboardNavigation } from './use-keyboard-navigation';
+import { useKeyboardNavigation } from '../shared/use-keyboard-navigation';
 import type { DateTimePeriodPickerProps } from './types';
 import './styles.scss';
 
@@ -22,10 +23,24 @@ function PickerShell({ variant, label, labelUppercase, initialRef, finalRef }: P
   const picker = usePicker();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const anchorRef = useRef<HTMLDivElement>(null);
-  const { handleContainerKeyDown, handleInputKeyDown } = useKeyboardNavigation();
+  const { handleContainerKeyDown, handleInputKeyDown } = useKeyboardNavigation({
+    isOpen: picker.isOpen,
+    focusedDate: picker.focusedDate,
+    viewDate: picker.viewDate,
+    min: picker.min,
+    max: picker.max,
+    setFocusedDate: picker.setFocusedDate,
+    setViewDate: picker.setViewDate,
+    navigateMonth: picker.navigateMonth,
+    selectDate: picker.selectDate,
+  });
 
   useEffect(() => {
-    picker.setOnInputKeyDown(handleInputKeyDown);
+    // Bridge: wrap the shared handleInputKeyDown (no field param) so the
+    // period-picker's onInputKeyDown signature (with field param) is satisfied.
+    picker.setOnInputKeyDown((_e, _field) => {
+      handleInputKeyDown(_e);
+    });
   }, [handleInputKeyDown, picker.setOnInputKeyDown]);
 
   // Close dropdown when focus leaves the entire component
@@ -67,7 +82,7 @@ function PickerShell({ variant, label, labelUppercase, initialRef, finalRef }: P
         <DateInput field="final" externalRef={finalRef} />
       </div>
 
-      <Dropdown anchorRef={anchorRef}>
+      <Dropdown anchorRef={anchorRef} isOpen={picker.isOpen} onClose={picker.close} ariaLabel="Selecionar período">
         <Calendar />
         {variant === 'datetime' && <TimeSelector />}
       </Dropdown>

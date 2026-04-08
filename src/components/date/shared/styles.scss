@@ -1,24 +1,12 @@
+// src/components/date/shared/styles.scss
 @use 'variables' as *;
 
-.datetime-period-picker {
+@mixin date-component-base {
   // --- Wrapper ---
   position: relative;
   display: inline-flex;
   flex-direction: column;
   font-family: $font-sans;
-
-  // --- Inputs row ---
-  .input-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .separator {
-    color: $text;
-    font-size: 14px;
-    user-select: none;
-  }
 
   .label {
     font-size: 14px;
@@ -144,7 +132,7 @@
     gap: 1px;
   }
 
-  // --- Day cells ---
+  // --- Day cells (base) ---
   .day {
     display: flex;
     align-items: center;
@@ -160,7 +148,7 @@
     padding: 0;
     transition: background 0.1s, color 0.1s;
 
-    &:hover:not([data-state-disabled='true']):not([data-state-selected-start='true']):not([data-state-selected-end='true']) {
+    &:hover:not([data-state-disabled='true']) {
       background: $accent-bg;
     }
 
@@ -177,31 +165,6 @@
 
     &[data-state-today='true'] {
       border: 1px solid $accent-border;
-    }
-
-    &[data-state-selected-start='true'],
-    &[data-state-selected-end='true'] {
-      background: $accent;
-      color: #fff;
-      font-weight: 600;
-    }
-
-    &[data-state-in-range='true'] {
-      background: $accent-bg;
-      border-radius: 0;
-
-      &[data-state-selected-start='true'] {
-        border-radius: 6px 0 0 6px;
-      }
-
-      &[data-state-selected-end='true'] {
-        border-radius: 0 6px 6px 0;
-      }
-    }
-
-    &[data-state-hover-preview='true'] {
-      background: $accent-bg;
-      opacity: 0.6;
     }
 
     // focus-visible is not used — buttons don't receive real focus in dual-focus mode

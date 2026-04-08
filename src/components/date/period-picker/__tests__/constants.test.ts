@@ -12,7 +12,7 @@ import {
   isValidDate,
   buildCalendarGrid,
   sortPeriod,
-} from '../constants';
+} from '../../shared/constants';
 
 describe('constants', () => {
   it('DAYS_OF_WEEK has 7 pt-BR day labels', () => {

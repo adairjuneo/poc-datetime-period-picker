@@ -1,3 +1,4 @@
+// src/components/date/period-picker/time-selector.tsx
 import { useEffect, useRef, useCallback } from 'react';
 import { usePicker } from './context';
 
@@ -47,8 +48,6 @@ export function TimeSelector() {
   );
 
   // Prevent mousedown from stealing focus from the input fields.
-  // Items are tabIndex={-1} so onKeyDown never fires, but the handler
-  // satisfies the jsx-a11y/click-events-have-key-events lint rule.
   const preventFocusSteal = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
   }, []);

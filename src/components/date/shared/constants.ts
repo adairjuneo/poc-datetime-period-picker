@@ -1,3 +1,4 @@
+// src/components/date/shared/constants.ts
 import moment from "moment";
 import type { Variant, CalendarCell } from "./types";
 
@@ -47,7 +48,6 @@ export function parseDatePtBr(raw: string, variant: Variant): Date | null {
   const m = moment(raw, fmt, true);
   if (!m.isValid()) return null;
 
-  // Round-trip check kept for behavioral parity with previous implementation
   const roundTrip = m.format(fmt);
   if (roundTrip !== raw) return null;
 

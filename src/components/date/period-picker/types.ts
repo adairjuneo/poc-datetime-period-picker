@@ -1,4 +1,7 @@
-export type Variant = "date" | "datetime";
+import type { Variant, CalendarCell, KeyboardEventLike } from '../shared/types';
+
+// Re-export shared types for convenience within this module
+export type { Variant, CalendarCell, KeyboardEventLike };
 
 export type DatePeriod<
   I extends string = 'initial',
@@ -36,17 +39,6 @@ export type DateTimePeriodPickerProps<
   finalName?: F;
   initialRef?: React.RefObject<HTMLInputElement | null>;
   finalRef?: React.RefObject<HTMLInputElement | null>;
-};
-
-export type CalendarCell = {
-  date: Date;
-  isCurrentMonth: boolean;
-};
-
-export type KeyboardEventLike = {
-  key: string;
-  preventDefault: () => void;
-  stopPropagation: () => void;
 };
 
 export type InputKeyDownHandler = (e: KeyboardEventLike, field: 'initial' | 'final') => void;

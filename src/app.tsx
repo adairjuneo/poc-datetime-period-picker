@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import moment from 'moment';
-import { DateTimePeriodPicker } from './components/datetime-period-picker';
-import type { DatePeriod } from './components/datetime-period-picker';
+import { DateTimePeriodPicker } from './components/date/period-picker';
+import type { DatePeriod } from './components/date/period-picker';
 
 export function App() {
   const [datePeriod, setDatePeriod] = useState<DatePeriod>({

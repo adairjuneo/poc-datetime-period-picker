@@ -1,36 +1,45 @@
 import { useCallback } from 'react';
 import moment from 'moment';
-import { usePicker } from './context';
 import type { KeyboardEventLike } from './types';
 
-export function useKeyboardNavigation() {
-  const picker = usePicker();
+export type KeyboardNavDeps = {
+  isOpen: boolean;
+  focusedDate: Date | null;
+  viewDate: Date;
+  min: Date | null;
+  max: Date | null;
+  setFocusedDate: (date: Date | null) => void;
+  setViewDate: (date: Date) => void;
+  navigateMonth: (dir: 1 | -1) => void;
+  selectDate: (date: Date) => void;
+};
 
+export function useKeyboardNavigation(deps: KeyboardNavDeps) {
   const isWithinBounds = useCallback(
     (date: Date): boolean => {
-      if (picker.min && moment(date).isBefore(picker.min)) return false;
-      if (picker.max && moment(date).isAfter(picker.max)) return false;
+      if (deps.min && moment(date).isBefore(deps.min)) return false;
+      if (deps.max && moment(date).isAfter(deps.max)) return false;
       return true;
     },
-    [picker.min, picker.max],
+    [deps.min, deps.max],
   );
 
   const moveFocus = useCallback(
     (newDate: Date) => {
       if (!isWithinBounds(newDate)) return;
-      picker.setFocusedDate(newDate);
-      if (!moment(newDate).isSame(picker.viewDate, 'month')) {
-        picker.setViewDate(moment(newDate).startOf('month').toDate());
+      deps.setFocusedDate(newDate);
+      if (!moment(newDate).isSame(deps.viewDate, 'month')) {
+        deps.setViewDate(moment(newDate).startOf('month').toDate());
       }
     },
-    [isWithinBounds, picker.setFocusedDate, picker.viewDate, picker.setViewDate],
+    [isWithinBounds, deps.setFocusedDate, deps.viewDate, deps.setViewDate],
   );
 
   const handleContainerKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (!picker.isOpen || !picker.focusedDate) return;
+      if (!deps.isOpen || !deps.focusedDate) return;
 
-      const date = picker.focusedDate;
+      const date = deps.focusedDate;
       let newDate: Date | null = null;
 
       switch (e.key) {
@@ -53,10 +62,10 @@ export function useKeyboardNavigation() {
           newDate = moment(date).add(1, 'months').toDate();
           break;
         case 'Home':
-          newDate = moment(picker.viewDate).startOf('month').toDate();
+          newDate = moment(deps.viewDate).startOf('month').toDate();
           break;
         case 'End':
-          newDate = moment(picker.viewDate).endOf('month').toDate();
+          newDate = moment(deps.viewDate).endOf('month').toDate();
           break;
         default:
           return; // Don't preventDefault for unhandled keys
@@ -67,20 +76,19 @@ export function useKeyboardNavigation() {
         moveFocus(newDate);
       }
     },
-    [picker.isOpen, picker.focusedDate, picker.viewDate, moveFocus],
+    [deps.isOpen, deps.focusedDate, deps.viewDate, moveFocus],
   );
 
   const handleInputKeyDown = useCallback(
-    (e: KeyboardEventLike, _field: 'initial' | 'final') => {
-      if (!picker.isOpen || !picker.focusedDate) return;
+    (e: KeyboardEventLike) => {
+      if (!deps.isOpen || !deps.focusedDate) return;
 
       if (e.key === 'Enter') {
         e.preventDefault();
-        picker.selectDate(picker.focusedDate);
-        // Auto-advance is handled by selectDate → setActiveField('final') → DateInput useEffect
+        deps.selectDate(deps.focusedDate);
       }
     },
-    [picker.isOpen, picker.focusedDate, picker.selectDate],
+    [deps.isOpen, deps.focusedDate, deps.selectDate],
   );
 
   return { handleContainerKeyDown, handleInputKeyDown };

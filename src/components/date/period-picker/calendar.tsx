@@ -1,7 +1,8 @@
+// src/components/date/period-picker/calendar.tsx
 import { useCallback } from 'react';
 import moment from 'moment';
 import { usePicker } from './context';
-import { DAYS_OF_WEEK, MONTHS, buildCalendarGrid } from './constants';
+import { DAYS_OF_WEEK, MONTHS, buildCalendarGrid } from '../shared/constants';
 
 export function Calendar() {
   const picker = usePicker();

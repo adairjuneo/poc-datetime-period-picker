@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState, useCallback, type ReactNode } from 'react';
-import { usePicker } from './context';
 
 type DropdownProps = {
-  anchorRef: React.RefObject<HTMLDivElement | null>;
+  anchorRef: React.RefObject<HTMLElement | null>;
+  isOpen: boolean;
+  onClose: () => void;
+  ariaLabel?: string;
   children: ReactNode;
 };
 
@@ -11,8 +13,7 @@ type Position = {
   alignRight: boolean;
 };
 
-export function Dropdown({ anchorRef, children }: DropdownProps) {
-  const picker = usePicker();
+export function Dropdown({ anchorRef, isOpen, onClose, ariaLabel = 'Selecionar data', children }: DropdownProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<Position>({ above: false, alignRight: false });
 
@@ -36,7 +37,7 @@ export function Dropdown({ anchorRef, children }: DropdownProps) {
 
   // Recalculate on open, resize, scroll
   useEffect(() => {
-    if (!picker.isOpen) return;
+    if (!isOpen) return;
 
     updatePosition();
 
@@ -48,11 +49,11 @@ export function Dropdown({ anchorRef, children }: DropdownProps) {
       window.removeEventListener('resize', handleUpdate);
       window.removeEventListener('scroll', handleUpdate, true);
     };
-  }, [picker.isOpen, updatePosition]);
+  }, [isOpen, updatePosition]);
 
   // Close on click outside
   useEffect(() => {
-    if (!picker.isOpen) return;
+    if (!isOpen) return;
 
     const handleMouseDown = (e: MouseEvent) => {
       const target = e.target as Node;
@@ -62,15 +63,15 @@ export function Dropdown({ anchorRef, children }: DropdownProps) {
         anchorRef.current &&
         !anchorRef.current.contains(target)
       ) {
-        picker.close();
+        onClose();
       }
     };
 
     document.addEventListener('mousedown', handleMouseDown);
     return () => document.removeEventListener('mousedown', handleMouseDown);
-  }, [picker.isOpen, picker, anchorRef]);
+  }, [isOpen, onClose, anchorRef]);
 
-  if (!picker.isOpen) return null;
+  if (!isOpen) return null;
 
   return (
     <div
@@ -79,7 +80,7 @@ export function Dropdown({ anchorRef, children }: DropdownProps) {
       data-state-above={position.above || undefined}
       data-state-align-right={position.alignRight || undefined}
       role="dialog"
-      aria-label="Selecionar período"
+      aria-label={ariaLabel}
     >
       {children}
     </div>

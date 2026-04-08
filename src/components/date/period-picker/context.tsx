@@ -1,3 +1,4 @@
+// src/components/date/period-picker/context.tsx
 import {
   createContext,
   useContext,
@@ -8,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import moment from "moment";
-import { formatToIso, parseDatePtBr, sortPeriod } from "./constants";
+import { formatToIso, parseDatePtBr, sortPeriod } from "../shared/constants";
 import type {
   DateTimePeriodPickerProps,
   DatePeriodChangeEvent,

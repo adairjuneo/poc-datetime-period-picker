@@ -1,0 +1,52 @@
+// src/components/date/period-picker/styles.scss
+@use '../shared/variables' as *;
+@use '../shared/styles';
+
+.datetime-period-picker {
+  @include styles.date-component-base;
+
+  // --- Period-specific: Inputs row ---
+  .input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .separator {
+    color: $text;
+    font-size: 14px;
+    user-select: none;
+  }
+
+  // --- Period-specific: Day selection ---
+  .day {
+    &:hover:not([data-state-disabled='true']):not([data-state-selected-start='true']):not([data-state-selected-end='true']) {
+      background: $accent-bg;
+    }
+
+    &[data-state-selected-start='true'],
+    &[data-state-selected-end='true'] {
+      background: $accent;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    &[data-state-in-range='true'] {
+      background: $accent-bg;
+      border-radius: 0;
+
+      &[data-state-selected-start='true'] {
+        border-radius: 6px 0 0 6px;
+      }
+
+      &[data-state-selected-end='true'] {
+        border-radius: 0 6px 6px 0;
+      }
+    }
+
+    &[data-state-hover-preview='true'] {
+      background: $accent-bg;
+      opacity: 0.6;
+    }
+  }
+}
