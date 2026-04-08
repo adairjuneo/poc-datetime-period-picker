@@ -1,4 +1,3 @@
-// src/app.tsx
 import { useState } from 'react';
 import moment from 'moment';
 import { DateTimePeriodPicker } from './components/date/period-picker';
@@ -23,12 +22,13 @@ export function App() {
 
   return (
     <main>
-      <h2>DateTime Period Picker</h2>
+      <h2>Date Pickers</h2>
 
-      <div className="components">
+      <div className="components" style={{ display: 'flex', flexDirection: 'row', gap: '2rem' }}>
         <section>
           <h3>Variante: date</h3>
           <DateTimePeriodPicker
+            label="Período"
             name="datePeriod"
             variant="date"
             value={datePeriod}
@@ -40,6 +40,7 @@ export function App() {
         <section>
           <h3>Variante: datetime</h3>
           <DateTimePeriodPicker
+            label="Período com horas/minutos"
             name="dateTimePeriod"
             variant="datetime"
             value={dateTimePeriod}
@@ -47,11 +48,7 @@ export function App() {
           />
           <pre>{JSON.stringify(dateTimePeriod, null, 2)}</pre>
         </section>
-      </div>
 
-      <h2>DateTime Picker</h2>
-
-      <div className="components">
         <section>
           <h3>Variante: date</h3>
           <DateTimePicker
@@ -71,7 +68,7 @@ export function App() {
             variant="datetime"
             value={singleDateTime}
             onChange={(e) => setSingleDateTime(e.target.value)}
-            label="Data e hora"
+            label="Data e horas/minutos"
           />
           <pre>{JSON.stringify(singleDateTime)}</pre>
         </section>
