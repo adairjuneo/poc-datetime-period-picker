@@ -1,0 +1,26 @@
+// src/components/date/picker/styles.scss
+@use '../shared/variables' as *;
+@use '../shared/styles';
+
+.datetime-picker {
+  @include styles.date-component-base;
+
+  // --- Picker-specific: single input wrapper ---
+  .input-group {
+    display: flex;
+    align-items: center;
+  }
+
+  // --- Picker-specific: single selected day ---
+  .day {
+    &[data-state-selected='true'] {
+      background: $accent;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    &:hover:not([data-state-disabled='true']):not([data-state-selected='true']) {
+      background: $accent-bg;
+    }
+  }
+}
