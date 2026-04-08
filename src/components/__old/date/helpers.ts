@@ -1,7 +1,7 @@
 import moment, { type Moment } from 'moment';
 import memoize from 'lodash/memoize';
 import { OPTIONS_ON_DENIED } from '../../permissionValidations';
-import type { PeriodOptions } from './dateperiodfield/types';
+import type { PeriodOptions } from './dateperiod/types';
 import { Keys } from './types';
 
 export const TOKEN_MASK = '00/00/0000';
