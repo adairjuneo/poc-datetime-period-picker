@@ -1,7 +1,9 @@
+// src/app.tsx
 import { useState } from 'react';
 import moment from 'moment';
 import { DateTimePeriodPicker } from './components/date/period-picker';
 import type { DatePeriod } from './components/date/period-picker';
+import { DateTimePicker } from './components/date/picker';
 
 export function App() {
   const [datePeriod, setDatePeriod] = useState<DatePeriod>({
@@ -13,6 +15,9 @@ export function App() {
     initial: '',
     final: '',
   });
+
+  const [singleDate, setSingleDate] = useState('');
+  const [singleDateTime, setSingleDateTime] = useState('');
 
   moment.locale('pt-BR');
 
@@ -41,6 +46,34 @@ export function App() {
             onChange={(e) => setDateTimePeriod(e.target.value)}
           />
           <pre>{JSON.stringify(dateTimePeriod, null, 2)}</pre>
+        </section>
+      </div>
+
+      <h2>DateTime Picker</h2>
+
+      <div className="components">
+        <section>
+          <h3>Variante: date</h3>
+          <DateTimePicker
+            name="singleDate"
+            variant="date"
+            value={singleDate}
+            onChange={(e) => setSingleDate(e.target.value)}
+            label="Data"
+          />
+          <pre>{JSON.stringify(singleDate)}</pre>
+        </section>
+
+        <section>
+          <h3>Variante: datetime</h3>
+          <DateTimePicker
+            name="singleDateTime"
+            variant="datetime"
+            value={singleDateTime}
+            onChange={(e) => setSingleDateTime(e.target.value)}
+            label="Data e hora"
+          />
+          <pre>{JSON.stringify(singleDateTime)}</pre>
         </section>
       </div>
     </main>
